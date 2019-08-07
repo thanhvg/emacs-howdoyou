@@ -116,10 +116,10 @@ tags)'."
   (let ((tag (dom-tag node))
         (shr-bullet "- ")) ;; insead of *
     (cond
-     ((equal tag 'pre)
-      (insert "\n#+begin_example " lang "\n")
-      (shr-insert-document node)
-      (insert "#+end_example\n"))
+     ;; ((equal tag 'pre)
+     ;;  (insert "\n#+begin_example " lang "\n")
+     ;;  (shr-insert-document node)
+     ;;  (insert "#+end_example\n"))
      ;; ((equal tag 'a)
      ;;  (insert "[[")
      ;;  (insert (dom-attr node 'href))
@@ -142,14 +142,14 @@ tags)'."
               "]["
               (dom-texts it)
               "]]"))
+     ((equal (car it) 'pre)
+      (append `(pre nil "#+begin_example " ,inject-lang) (nthcdr 2 it) '("#+end_example")))
      (t (mapcar #'howdoyou--it-to-it it))))
    (t it)))
 
 (defun howdoyou--print-dom (dom lang)
-  (let* ((my-dom (mapcar #'howdoyou--it-to-it dom))
-         (children (dom-non-text-children my-dom)))
-    (dolist (child children)
-      (howdoyou--print-node child lang))))
+  (howdoyou--print-node (let ((inject-lang lang))
+                          (mapcar #'howdoyou--it-to-it dom)) lang))
 
 (defun howdoyou-query (query)
   (interactive "sQuery: ")
