@@ -83,3 +83,5 @@ now the lines are long and double white spaces
 how about modify the dom directly
 * dom is just a tree 
 walk this dom and if it's an a tag, replace it* dom is just a tree 
+* manipulate dom all in one
+to drop the insert example org

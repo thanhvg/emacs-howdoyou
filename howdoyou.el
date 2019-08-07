@@ -134,19 +134,20 @@ tags)'."
 (defun howdoyou--it-to-it (it)
   (cond
    ((and (listp it)
-         (listp (cdr it)))
-    (if (equal (car it) 'a)
-        (concat "[["
-                (dom-attr it 'href)
-                "]["
-                (dom-text it)
-                "]]")
-      (mapcar #'howdoyou--it-to-it it)))
+         (listp (cdr it))) ;; check for list but not cons
+    (cond
+     ((equal (car it) 'a)
+      (concat "[["
+              (dom-attr it 'href)
+              "]["
+              (dom-texts it)
+              "]]"))
+     (t (mapcar #'howdoyou--it-to-it it))))
    (t it)))
 
 (defun howdoyou--print-dom (dom lang)
   (let* ((my-dom (mapcar #'howdoyou--it-to-it dom))
-        (children (dom-non-text-children my-dom)))
+         (children (dom-non-text-children my-dom)))
     (dolist (child children)
       (howdoyou--print-node child lang))))
 
