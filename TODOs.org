@@ -76,3 +76,10 @@ done
 #+end_example
 * parse link and retain img
 query ubuntu disk partition
+
+done but not good
+now the lines are long and double white spaces
+
+how about modify the dom directly
+* dom is just a tree 
+walk this dom and if it's an a tag, replace it* dom is just a tree 
