@@ -63,10 +63,11 @@
     (mapcar #'dom-text tag-doms)))
 
 (defun howdoyou--promise-so-answer (result)
-  "get the first child in class answers and question from
-`result' which is a `(url . dom)' return `(url question answer tags)'"
+  "Get the first child in class answers and question from
+`result' which is a `(url . dom)' return `(url question answer
+tags)'."
   ;; (message "got the (cdr result)")
-  (setq thanh (cdr result))
+  ;; (setq thanh (cdr result))
   (let ((answer-dom (car (dom-by-class (cdr result) "^answer\s?")))
         (question-dom (car (dom-by-id (cdr result) "^question$")))
         (tags (howdoyou--get-so-tags (cdr result))))
@@ -77,45 +78,66 @@
           tags)))
 ;; (dom-texts (dom-by-class answer-dom "post-text"))))
 
-(defun howdoyou--print-answer (answer)
-  "print answer to buffer"
-  (let ((howdoi-buffer (get-buffer-create "*How Do You*")))
+(defun howdoyou--print-answer (answer-list)
+  "Print ANSWER-LIST to buffer."
+  (let ((howdoi-buffer (get-buffer-create "*How Do You*"))
+        (url (car answer-list))
+        (question (nth 1 answer-list) )
+        (answer (nth 2 answer-list))
+        (tags (nth 3 answer-list))
+        (lang (car (nth 3 answer-list)))) ;; first tag is usually the language
+    (setq thanh answer)
     (save-selected-window
       (with-current-buffer howdoi-buffer
         (read-only-mode -1)
         (erase-buffer)
         (insert "#+STARTUP: showall indent\n")
         (insert "* Question\n")
-        (insert (replace-regexp-in-string "&.*$" "" (car answer))) ;; url
+        (insert (replace-regexp-in-string "&.*$" "" url)) ;; url
         ;; (shr-insert-document (nth 1 answer))
-        (howdoyou--print-dom (nth 1 answer) (nth 3 answer))
+        (howdoyou--print-dom question lang)
         ;; (setq thanh (nth 1 answer))
         ;; (shr-insert "==================Answer==================")
         ;; (insert "\n==================Answer==================\n")
         ;; (insert (nth 3 answer))
         (insert "tags: ")
-        (dolist (tag (nth 3 answer))
+        (dolist (tag tags)
           (insert tag)
           (insert " "))
         (insert "\n* Answer")
-        (howdoyou--print-dom (nth 2 answer) (nth 3 answer))
+        (howdoyou--print-dom answer lang)
         ;; (shr-insert-document (nth 2 answer))
         ;; (eww-mode)
         (org-mode)
         (goto-char (point-min)))
       (pop-to-buffer howdoi-buffer))))
 
-(defun howdoyou--print-node (node tag)
-  (if (equal (dom-tag node) 'pre)
-      (progn (insert "\n#+begin_example " tag "\n")
-             (shr-insert-document node)
-             (insert "#+end_example\n"))
-    (shr-insert-document node)))
+(defun howdoyou--print-node (node lang)
+  (if (listp node)
+      (let ((tag (dom-tag node)))
+        (cond
+         ((equal tag 'pre)
+          (insert "\n#+begin_example " lang "\n")
+          (shr-insert-document node)
+          (insert "#+end_example\n"))
+         ((equal tag 'a)
+          (insert "[[")
+          (insert (dom-attr node 'href))
+          (insert "]")
+          (insert "[")
+          (insert (dom-text node))
+          (insert "]]"))
+         ((equal tag 'img)
+          (shr-insert-document node))
+         ((equal tag nil)
+          (shr-insert-document node))
+         (t (howdoyou--print-dom node lang))))
+    (insert node)))
 
-(defun howdoyou--print-dom (dom tags)
-  (let ((children (dom-non-text-children dom)))
+(defun howdoyou--print-dom (dom lang)
+  (let ((children (dom-children dom)))
     (dolist (child children)
-      (howdoyou--print-node child (car tags)))))
+      (howdoyou--print-node child lang))))
 
 (defun howdoyou-query (query)
   (interactive "sQuery: ")

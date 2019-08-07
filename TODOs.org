@@ -64,6 +64,7 @@ travese the dom tree and print the code part in side done
 
 org template and find the code type to highlight
 each will have tag use the tag 
+
 * next and previous link
 local buffer var
 no, just a global state is ok 
@@ -73,3 +74,5 @@ done
 #+begin_example
 
 #+end_example
+* parse link and retain img
+query ubuntu disk partition
