@@ -1,0 +1,75 @@
+#+STARTUP:    align fold hidestars oddeven indent 
+
+* lsp next prev occurence
+
+We may implement this method by using either textDocument/documentHighlight
+which are scoped to the current buffer or by textDocument/references (which is
+not scoped to the current buffer). If you want to give it a try you may take a
+look at lsp--make-document-highlight-callback which is handling the rendering of
+the highlights. It will be good if we reuse the data for two subsequent calls to
+next occurrence if there are no changes.
+
+** TODO call lsp highlight and log out result
+
+(:jsonrpc "2.0" :method "textDocument/documentHighlight" :params (:textDocument (:uri "file:///home/gvuong/git/ivt6/projects/web/src/webserver/src/routes/api/hvr-cameras.js") :position (:line 75 :character 10)) :id 23)
+highlight: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("kind" 2 "range" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("start" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 75 "character" 10)) "end" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 75 "character" 18)))))) 
+range: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("start" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 75 "character" 10)) "end" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 75 "character" 18)))) 
+kind: 2 
+start: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 75 "character" 10)) 
+end: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 75 "character" 18)) 
+highlight: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("kind" 2 "range" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("start" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 76 "character" 16)) "end" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 76 "character" 24)))))) 
+range: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("start" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 76 "character" 16)) "end" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 76 "character" 24)))) 
+kind: 2 
+start: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 76 "character" 16)) 
+end: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 76 "character" 24)) 
+highlight: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("kind" 2 "range" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("start" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 78 "character" 51)) "end" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 78 "character" 59)))))) 
+range: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("start" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 78 "character" 51)) "end" #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 78 "character" 59)))) 
+kind: 2 
+start: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 78 "character" 51)) 
+end: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 78 "character" 59)) 
+
+** convert `start` to point with lsp--position-to-point
+
+(:jsonrpc "2.0" :method "textDocument/documentHighlight" :params (:textDocument (:uri "file:///home/gvuong/git/ivt6/projects/web/src/webserver/src/routes/api/hvr-cameras.js") :position (:line 75 :character 10)) :id 24)
+start: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 75 "character" 10)) 
+end: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 75 "character" 18)) 
+point: 2182 
+start: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 76 "character" 16)) 
+end: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 76 "character" 24)) 
+point: 2242 
+start: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 78 "character" 51)) 
+end: #s(hash-table size 65 test equal rehash-size 1.5 rehash-threshold 0.8125 data ("line" 78 "character" 59)) 
+point: 2304 
+
+** once you have the list of point you need to have
+
+- current point
+- compare current point to find next and prev points
+
+let check 
+* helm evil mark
+reuse part of evil-show-marks to generate helm source
+use evil-goto-mark to go to buffer
+* helm lsp 
+symbols with context 
+* DONE get google search links
+CLOSED: [2019-08-05 Mon 16:31]
+* parse SO link
+* use async await lib
+https://nullprogram.com/blog/2019/03/10/
+this one is hard
+use promise.el instead
+* pretty print the dom 
+travese the dom tree and print the code part in side done
+
+org template and find the code type to highlight
+each will have tag use the tag 
+* next and previous link
+local buffer var
+no, just a global state is ok 
+because you will have a singleton *How Dou You* buffer
+* insert link also
+done
+#+begin_example
+
+#+end_example
