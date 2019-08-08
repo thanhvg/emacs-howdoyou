@@ -86,7 +86,7 @@ URL is a link string. Download the url and parse it to a DOM object"
               (howdoyou--google-to-links (cdr result))))
       (then (lambda (links)
               ;; (message "%s" links)
-              ;; (setq thanh links)
+              (setq thanh links)
               (setq howdoyou--links links)
               (setq howdoyou--current-link-index 0)
               (howdoyou--promise-dom (car links))))
@@ -154,13 +154,13 @@ Return (url title question answers scores tags)"
           (insert tag)
           (insert " "))
         (cl-mapcar (lambda (a s)
-                   (insert (format "\n* Answer (%s)" s))
-                   (when first-run
-                     (insert "\n:PROPERTIES:\n:VISIBILITY: all\n:END:\n")
-                     (setq first-run nil))
-                   (howdoyou--print-dom a))
-                 answers
-                 answer-scores)
+                     (insert (format "\n* Answer (%s)" s))
+                     (when first-run
+                       (insert "\n:PROPERTIES:\n:VISIBILITY: all\n:END:\n")
+                       (setq first-run nil))
+                     (howdoyou--print-dom a))
+                   answers
+                   answer-scores)
         (org-mode)
         (goto-char (point-min)))
       (pop-to-buffer howdoi-buffer))))
@@ -210,6 +210,13 @@ Pop up *How Do You* buffer to show the answer."
   (promise-chain
       (howdoyou--promise-dom (nth howdoyou--current-link-index
                                   howdoyou--links))
+    (then #'howdoyou--promise-so-answer)
+    (then #'howdoyou--print-answer)
+    (promise-catch (lambda (reason)
+                     (message "catch the error: %s" reason)))))
+
+(defun howdoyou-read-so-link (link)
+  (promise-chain (howdoyou--promise-dom link)
     (then #'howdoyou--promise-so-answer)
     (then #'howdoyou--print-answer)
     (promise-catch (lambda (reason)
