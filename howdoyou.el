@@ -36,6 +36,9 @@
 (defvar howdoyou--current-lang nil
   "guested language")
 
+(defvar howdoyou--number-of-answers 3
+  "number of maximal answers to show")
+
 (defun howdoyou-promise-answer (query)
   "query and print answer"
   (let ((url "https://www.google.com/search")
@@ -67,27 +70,30 @@
 
 (defun howdoyou--promise-so-answer (result)
   "Get the first child in class answers and question from
-`result' which is a `(url . dom)' return `(url question answer
-tags)'."
-  (let ((answer-dom (car (dom-by-class (cdr result) "^answer\s?")))
-        (question-dom (car (dom-by-id (cdr result) "^question$")))
-        (tags (howdoyou--get-so-tags (cdr result))))
-    ;; (tags '("sh" "yay")))
+`result' which is a `(url . dom)' return `(url question answer tags)'."
+  (setq thanh-so (cdr result))
+  (let* ((answer-nodes (dom-by-class (cdr result) "answercell"))
+         (question-dom (car (dom-by-id (cdr result) "^question$")))
+         (number-of-answers (if (> (length answer-nodes) howdoyou--number-of-answers)
+                                howdoyou--number-of-answers
+                              (length answer-nodes)))
+         (tags (howdoyou--get-so-tags (cdr result)))
+         (acc nil))
     (list (car result)
           (dom-by-class question-dom "post-text")
-          (dom-by-class answer-dom "post-text")
+          (dotimes (i number-of-answers acc)
+            (setq acc (append acc (dom-by-class (nth i answer-nodes) "post-text"))))
           tags)))
-;; (dom-texts (dom-by-class answer-dom "post-text"))))
 
 (defun howdoyou--print-answer (answer-list)
   "Print ANSWER-LIST to buffer."
-  (let ((howdoi-buffer (get-buffer-create "*How Do You*"))
-        (url (car answer-list))
-        (question (nth 1 answer-list) )
-        (answer (nth 2 answer-list))
-        (tags (nth 3 answer-list))
-        (lang (car (nth 3 answer-list)))) ;; first tag is usually the language
-    (setq thanh answer)
+  (let* ((howdoi-buffer (get-buffer-create "*How Do You*"))
+         (url (car answer-list))
+         (question (nth 1 answer-list) )
+         (answers (nth 2 answer-list))
+         (tags (nth 3 answer-list))
+         (lang (car (nth 3 answer-list)))) ;; first tag is usually the language
+    (setq thanh answers)
     (setq thanh2 question)
     (setq howdoyou--current-lang lang)
     (save-selected-window
@@ -102,8 +108,9 @@ tags)'."
         (dolist (tag tags)
           (insert tag)
           (insert " "))
-        (insert "\n* Answer")
-        (howdoyou--print-dom answer)
+        (dolist (answer answers)
+          (insert "\n* Answer")
+          (howdoyou--print-dom answer))
         (org-mode)
         (goto-char (point-min)))
       (pop-to-buffer howdoi-buffer))))
