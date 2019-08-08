@@ -33,6 +33,9 @@
 (defvar howdoyou--current-link-index 0
   "current index of link")
 
+(defvar howdoyou--current-lang nil
+  "guested language")
+
 (defun howdoyou-promise-answer (query)
   "query and print answer"
   (let ((url "https://www.google.com/search")
@@ -66,8 +69,6 @@
   "Get the first child in class answers and question from
 `result' which is a `(url . dom)' return `(url question answer
 tags)'."
-  ;; (message "got the (cdr result)")
-  ;; (setq thanh (cdr result))
   (let ((answer-dom (car (dom-by-class (cdr result) "^answer\s?")))
         (question-dom (car (dom-by-id (cdr result) "^question$")))
         (tags (howdoyou--get-so-tags (cdr result))))
@@ -87,6 +88,8 @@ tags)'."
         (tags (nth 3 answer-list))
         (lang (car (nth 3 answer-list)))) ;; first tag is usually the language
     (setq thanh answer)
+    (setq thanh2 question)
+    (setq howdoyou--current-lang lang)
     (save-selected-window
       (with-current-buffer howdoi-buffer
         (read-only-mode -1)
@@ -94,42 +97,20 @@ tags)'."
         (insert "#+STARTUP: showall indent\n")
         (insert "* Question\n")
         (insert (replace-regexp-in-string "&.*$" "" url)) ;; url
-        ;; (shr-insert-document (nth 1 answer))
-        (howdoyou--print-dom question lang)
-        ;; (setq thanh (nth 1 answer))
-        ;; (shr-insert "==================Answer==================")
-        ;; (insert "\n==================Answer==================\n")
-        ;; (insert (nth 3 answer))
+        (howdoyou--print-dom question)
         (insert "tags: ")
         (dolist (tag tags)
           (insert tag)
           (insert " "))
         (insert "\n* Answer")
-        (howdoyou--print-dom answer lang)
-        ;; (shr-insert-document (nth 2 answer))
-        ;; (eww-mode)
+        (howdoyou--print-dom answer)
         (org-mode)
         (goto-char (point-min)))
       (pop-to-buffer howdoi-buffer))))
 
-(defun howdoyou--print-node (node lang)
-  (let ((tag (dom-tag node))
-        (shr-bullet "- ")) ;; insead of *
-    (cond
-     ;; ((equal tag 'pre)
-     ;;  (insert "\n#+begin_example " lang "\n")
-     ;;  (shr-insert-document node)
-     ;;  (insert "#+end_example\n"))
-     ;; ((equal tag 'a)
-     ;;  (insert "[[")
-     ;;  (insert (dom-attr node 'href))
-     ;;  (insert "]")
-     ;;  (insert "[")
-     ;;  (insert (dom-text node))
-     ;;  (insert "]]"))
-     ;; ((equal tag 'img)
-     ;;  (shr-insert-document node))
-     (t (shr-insert-document node)))))
+(defun howdoyou--print-node (node)
+  (let ((shr-bullet "- ")) ;; insead of *
+    (shr-insert-document node)))
 
 (defun howdoyou--it-to-it (it)
   (cond
@@ -143,13 +124,12 @@ tags)'."
               (dom-texts it)
               "]]"))
      ((equal (car it) 'pre)
-      (append `(pre nil "#+begin_example " ,inject-lang) (nthcdr 2 it) '("#+end_example")))
+      (append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
      (t (mapcar #'howdoyou--it-to-it it))))
    (t it)))
 
-(defun howdoyou--print-dom (dom lang)
-  (howdoyou--print-node (let ((inject-lang lang))
-                          (mapcar #'howdoyou--it-to-it dom)) lang))
+(defun howdoyou--print-dom (dom)
+  (howdoyou--print-node (mapcar #'howdoyou--it-to-it dom)))
 
 (defun howdoyou-query (query)
   (interactive "sQuery: ")
