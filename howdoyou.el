@@ -1,6 +1,7 @@
 ;;; -*- lexical-binding: t; -*-
 (require 'promise)
 (require 'dom)
+(require 'org)
 
 (defun howdoyou--google-to-links (dom)
   (let* ((my-divs (dom-by-class dom "jfp3ef"))
@@ -16,15 +17,12 @@
    (lambda (resolve reject)
      (url-retrieve url
                    (lambda (status)
-                     ;; All errors are reliably captured and rejected with appropriate values.
                      (if (plist-get status :error)
                          (funcall reject (plist-get status :error))
                        (condition-case ex
                            (with-current-buffer (current-buffer)
                              (if (not (url-http-parse-headers))
                                  (funcall reject (buffer-string))
-                               ;; (message "%s" (buffer-string))
-                               ;; (message "got it")
                                (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))
                          (error (funcall reject ex)))))))))
 (defvar howdoyou--links nil
@@ -70,7 +68,7 @@
 
 (defun howdoyou--promise-so-answer (result)
   "Get the first child in class answers and question from
-`result' which is a `(url . dom)' return `(url question answer tags)'."
+`result' which is a `(url . dom)' return `(url question answers scores tags)'."
   ;; (setq thanh-so (cdr result))
   (let* ((answer-nodes (dom-by-class (cdr result) "answercell"))
          (question-dom (car (dom-by-id (cdr result) "^question$")))
@@ -99,15 +97,16 @@
          (question-score (car scores))
          (answer-scores (cdr scores))
          (tags (nth 4 answer-list))
+         (first-run t) ;; flag for special treatment of first answer
          (lang (car tags))) ;; first tag is usually the language
-    (setq thanh answers)
-    (setq thanh-scores scores)
+    ;; (setq thanh answers)
+    ;; (setq thanh-scores scores)
     (setq howdoyou--current-lang lang)
     (save-selected-window
       (with-current-buffer howdoi-buffer
         (read-only-mode -1)
         (erase-buffer)
-        (insert "#+STARTUP: showall indent\n")
+        (insert "#+STARTUP: overview indent\n")
         (insert (format "* Question (%s)\n" question-score))
         (insert (replace-regexp-in-string "&.*$" "" url)) ;; url
         (howdoyou--print-dom question)
@@ -115,11 +114,11 @@
         (dolist (tag tags)
           (insert tag)
           (insert " "))
-        ;; (dolist (answer answers)
-        ;;   (insert "\n* Answer")
-        ;;   (howdoyou--print-dom answer))
         (mapcar* (lambda (a s)
                    (insert (format "\n* Answer (%s)" s))
+                   (when first-run
+                     (insert "\n:PROPERTIES:\n:VISIBILITY: all\n:END:\n")
+                     (setq first-run nil))
                    (howdoyou--print-dom a))
                  answers
                  answer-scores)
