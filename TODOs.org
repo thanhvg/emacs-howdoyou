@@ -32,3 +32,10 @@ walk this dom and if it's an a tag, replace it* dom is just a tree
 to drop the insert example org
 * DONE print 3 answers and scores
 * DONE show only first answer, collapse other
+* TODO better error handle
+uncompressing publicsuffix.txt.gz...done
+
+* DONE image inside a tag should be ignore
+* DONE include question title
+class: question-hyperlink
+* TODO packaging

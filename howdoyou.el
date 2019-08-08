@@ -1,9 +1,39 @@
-;;; -*- lexical-binding: t; -*-
+;;; howdoyou.el --- A stackoverflow and its sisters' sites reader   -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2019  Thanh Vuong
+
+;; Author: Thanh Vuong <thanhvg@gmail.com>
+;; URL: https://github.com/thanhvg/howdoyou/
+;; Version: 0.1
+;; Package-Requires: ((emacs "25.1"))
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Put a description of the package here
+
+;;; Code:
 (require 'promise)
 (require 'dom)
-(require 'org)
+(require 'cl-lib)
+
+;; (require 'org)
 
 (defun howdoyou--google-to-links (dom)
+  "Produce links from google search dom.
+DOM is a dom object of the google search, returns a list of links"
   (let* ((my-divs (dom-by-class dom "jfp3ef"))
          (my-a-tags (mapcar (lambda (a-div)
                               (dom-attr (dom-child-by-tag a-div 'a) 'href))
@@ -12,7 +42,9 @@
             (seq-filter (lambda (it) (if it t nil)) my-a-tags))))
 
 (defun howdoyou--promise-dom (url)
-  "promise a cons (url . dom)"
+  "Promise a cons (URL . dom).
+URL is a link string. Download the url and parse it to a DOM object"
+  (message "%s" url)
   (promise-new
    (lambda (resolve reject)
      (url-retrieve url
@@ -25,20 +57,21 @@
                                  (funcall reject (buffer-string))
                                (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))
                          (error (funcall reject ex)))))))))
+
 (defvar howdoyou--links nil
-  "list of so links from google search")
+  "List of so links from google search.")
 
 (defvar howdoyou--current-link-index 0
-  "current index of link")
+  "Current index of link.")
 
 (defvar howdoyou--current-lang nil
-  "guested language")
+  "Guested language.")
 
 (defvar howdoyou--number-of-answers 3
-  "number of maximal answers to show")
+  "Number of maximal answers to show.")
 
 (defun howdoyou-promise-answer (query)
-  "query and print answer"
+  "Process QUERY and print answers to *How Do You* buffer."
   (let ((url "https://www.google.com/search")
         (args (concat "?q="
                       (url-hexify-string query)
@@ -58,20 +91,24 @@
               (setq howdoyou--current-link-index 0)
               (howdoyou--promise-dom (car links))))
       (then #'howdoyou--promise-so-answer)
-      (then #'howdoyou--print-answer))
-    (concat url args)))
+      (then #'howdoyou--print-answer)
+      (promise-catch (lambda (reason)
+                       (message "catch the error: %s" reason))))))
 
 (defun howdoyou--get-so-tags (dom)
+  "Extract list of tags from stackoverflow DOM."
   (let ((tag-doms (dom-by-class (dom-by-class dom "^post-taglist")
                                 "^post-tag$")))
     (mapcar #'dom-text tag-doms)))
 
 (defun howdoyou--promise-so-answer (result)
-  "Get the first child in class answers and question from
-`result' which is a `(url . dom)' return `(url question answers scores tags)'."
+  "Produce answer-list  from stackoverflow response.
+RESULT is a (url . dom).
+Return (url title question answers scores tags)"
   ;; (setq thanh-so (cdr result))
   (let* ((answer-nodes (dom-by-class (cdr result) "answercell"))
          (question-dom (car (dom-by-id (cdr result) "^question$")))
+         (title (car (dom-by-class (cdr result) "question-hyperlink")))
          (number-of-answers (if (> (length answer-nodes) howdoyou--number-of-answers)
                                 howdoyou--number-of-answers
                               (length answer-nodes)))
@@ -80,6 +117,7 @@
          (acc nil)
          (scores nil))
     (list (car result)
+          (dom-text title)
           (dom-by-class question-dom "post-text")
           (dotimes (i number-of-answers acc)
             (setq acc (append acc (dom-by-class (nth i answer-nodes) "post-text"))))
@@ -88,15 +126,16 @@
           tags)))
 
 (defun howdoyou--print-answer (answer-list)
-  "Print ANSWER-LIST to buffer."
+  "Print ANSWER-LIST to *How Do You* buffer."
   (let* ((howdoi-buffer (get-buffer-create "*How Do You*"))
          (url (car answer-list))
-         (question (nth 1 answer-list) )
-         (answers (nth 2 answer-list))
-         (scores (nth 3 answer-list))
+         (title (nth 1 answer-list))
+         (question (nth 2 answer-list))
+         (answers (nth 3 answer-list))
+         (scores (nth 4 answer-list))
          (question-score (car scores))
          (answer-scores (cdr scores))
-         (tags (nth 4 answer-list))
+         (tags (nth 5 answer-list))
          (first-run t) ;; flag for special treatment of first answer
          (lang (car tags))) ;; first tag is usually the language
     ;; (setq thanh answers)
@@ -106,15 +145,15 @@
       (with-current-buffer howdoi-buffer
         (read-only-mode -1)
         (erase-buffer)
-        (insert "#+STARTUP: overview indent\n")
-        (insert (format "* Question (%s)\n" question-score))
+        (insert "#+STARTUP: overview indent\n#+TITLE: " title "\n")
         (insert (replace-regexp-in-string "&.*$" "" url)) ;; url
+        (insert (format "\n* Question (%s)" question-score))
         (howdoyou--print-dom question)
-        (insert "tags: ")
+        (insert "\nTags: ")
         (dolist (tag tags)
           (insert tag)
           (insert " "))
-        (mapcar* (lambda (a s)
+        (cl-mapcar (lambda (a s)
                    (insert (format "\n* Answer (%s)" s))
                    (when first-run
                      (insert "\n:PROPERTIES:\n:VISIBILITY: all\n:END:\n")
@@ -126,16 +165,21 @@
         (goto-char (point-min)))
       (pop-to-buffer howdoi-buffer))))
 
-(defun howdoyou--print-node (node)
+(defun howdoyou--print-node (dom)
+  "Print the DOM."
   (let ((shr-bullet "- ")) ;; insead of *
-    (shr-insert-document node)))
+    (shr-insert-document dom)))
 
 (defun howdoyou--it-to-it (it)
+  "Map node to node.
+IT is an element in the DOM tree. Map to different IT when it is
+a, img or pre. Othewise just copy"
   (cond
    ((and (listp it)
          (listp (cdr it))) ;; check for list but not cons
     (cond
-     ((equal (car it) 'a)
+     ((and (equal (car it) 'a)
+           (not (dom-by-tag it 'img))) ;; bail out if img
       (concat "[["
               (dom-attr it 'href)
               "]["
@@ -147,13 +191,17 @@
    (t it)))
 
 (defun howdoyou--print-dom (dom)
+  "Map new dom from DOM and print it."
   (howdoyou--print-node (mapcar #'howdoyou--it-to-it dom)))
 
 (defun howdoyou-query (query)
+  "Prompt for QUERY and search for answer.
+Pop up *How Do You* buffer to show the answer."
   (interactive "sQuery: ")
   (howdoyou-promise-answer query))
 
 (defun howdoyou-n-link (n)
+  "Jump N steps in `howdoyou--links' and request and print the answer."
   (setq howdoyou--current-link-index
         (if (and (<= (+ n howdoyou--current-link-index) (length howdoyou--links))
                  (>= (+ n howdoyou--current-link-index) 0))
@@ -163,14 +211,19 @@
       (howdoyou--promise-dom (nth howdoyou--current-link-index
                                   howdoyou--links))
     (then #'howdoyou--promise-so-answer)
-    (then #'howdoyou--print-answer)))
+    (then #'howdoyou--print-answer)
+    (promise-catch (lambda (reason)
+                     (message "catch the error: %s" reason)))))
 
 (defun howdoyou-next-link ()
-  "go to next link"
+  "Go to next link stored in google search."
   (interactive)
   (howdoyou-n-link 1))
 
 (defun howdoyou-previous-link ()
-  "go to previous link"
+  "Go to previous link stored in google search."
   (interactive)
   (howdoyou-n-link -1))
+
+(provide 'howdoyou)
+;;; howdoyou.el ends here
