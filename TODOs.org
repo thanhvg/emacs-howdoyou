@@ -39,3 +39,20 @@ uncompressing publicsuffix.txt.gz...done
 * DONE include question title
 class: question-hyperlink
 * TODO packaging
+* user agent
+test url
+https://www.google.com/search?q=curl%20 what ever
+
+working with user agent:
+curl -A "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" https://www.google.com/search?q=curl
+
+without, die
+curl 'https://www.google.com/search?q=curl'
+
+when you call withou user agent google will show different pages to you, 
+the trick (dom-by-class dom "jfp3ef") will only work on this case.
+
+because of this it can figure out you're not using a browser and ban you later
+
+
+
