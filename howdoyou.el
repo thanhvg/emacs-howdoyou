@@ -28,26 +28,17 @@
 (require 'promise)
 (require 'dom)
 (require 'cl-lib)
-
 ;; (require 'org)
 
-;; (defun howdoyou--google-to-links (dom)
-;;   "Produce links from google search dom.
-;; DOM is a dom object of the google search, returns a list of links"
-;;   (let* ((my-divs (dom-by-class dom "jfp3ef"))
-;;          (my-a-tags (mapcar (lambda (a-div)
-;;                               (dom-attr (dom-child-by-tag a-div 'a) 'href))
-;;                             my-divs)))
-;;     (mapcar (lambda (it) (substring it 7))
-;;             (seq-filter (lambda (it) (if it t nil)) my-a-tags))))
-
 (defun howdoyou--extract-links-from-l-class (dom)
+  "Extract links in l class from DOM."
   (let ((my-nodes (dom-by-class dom "^l$")))
     (mapcar (lambda (a-node)
               (dom-attr a-node 'href))
             my-nodes)))
 
 (defun howdoyou--extract-links-from-r-class (dom)
+  "Extract links inside r class from DOM."
   (let ((my-nodes (dom-by-class dom "^r$")))
     (mapcar (lambda (a-node)
               (dom-attr (dom-child-by-tag a-node 'a) 'href))
@@ -60,7 +51,6 @@ DOM is a dom object of the google search, returns a list of links"
       links
     (howdoyou--extract-links-from-r-class dom)))
 
-(setq url-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0")
 
 (defun howdoyou--promise-dom (url)
   "Promise a cons (URL . dom).
@@ -68,16 +58,34 @@ URL is a link string. Download the url and parse it to a DOM object"
   (message "%s" url)
   (promise-new
    (lambda (resolve reject)
-     (url-retrieve url
-                   (lambda (status)
-                     (if (plist-get status :error)
-                         (funcall reject (plist-get status :error))
-                       (condition-case ex
-                           (with-current-buffer (current-buffer)
-                             (if (not (url-http-parse-headers))
-                                 (funcall reject (buffer-string))
-                               (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))
-                         (error (funcall reject ex)))))))))
+     (let ((url-user-agent (howdoyou--get-user-agent)))
+       (url-retrieve url
+                     (lambda (status)
+                       (if (plist-get status :error)
+                           (funcall reject (plist-get status :error))
+                         (condition-case ex
+                             (with-current-buffer (current-buffer)
+                               (if (not (url-http-parse-headers))
+                                   (funcall reject (buffer-string))
+                                 (setq thanh-web (buffer-string))
+                                 (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))
+                           (error (funcall reject ex))))))))))
+
+(defvar howdoyou--current-user-agent 0)
+
+(defvar howdoyou--user-agents
+  '("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0"
+    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0"
+    "Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0"
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5"
+    "Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46  Safari/536.5"))
+
+(defun howdoyou--get-user-agent ()
+  (let ((user-agent (nth howdoyou--current-user-agent howdoyou--user-agents)))
+    (setq howdoyou--current-user-agent (if (>= howdoyou--current-user-agent (length howdoyou--user-agents))
+                                           0
+                                         (1+ howdoyou--current-user-agent)))
+    user-agent))
 
 (defvar howdoyou--links nil
   "List of so links from google search.")
@@ -101,9 +109,11 @@ URL is a link string. Download the url and parse it to a DOM object"
                       (url-hexify-string "site:stackexchange.com OR ")
                       (url-hexify-string "site:superuser.com OR ")
                       (url-hexify-string "site:serverfault.com OR ")
-                      (url-hexify-string "site:askubunu.com"))))
+                      (url-hexify-string "site:askubunu.com")
+                      "&hl=en")))
     (promise-chain (howdoyou--promise-dom (concat url args))
       (then (lambda (result)
+              (setq thanh-dom (cdr result))
               (howdoyou--extract-links-from-google (cdr result))))
       (then (lambda (links)
               ;; (message "%s" links)
@@ -237,6 +247,7 @@ Pop up *How Do You* buffer to show the answer."
                      (message "catch the error: %s" reason)))))
 
 (defun howdoyou-read-so-link (link)
+  "Read stackoverflow LINK in buffer."
   (promise-chain (howdoyou--promise-dom link)
     (then #'howdoyou--promise-so-answer)
     (then #'howdoyou--print-answer)
