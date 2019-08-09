@@ -31,15 +31,36 @@
 
 ;; (require 'org)
 
-(defun howdoyou--google-to-links (dom)
+;; (defun howdoyou--google-to-links (dom)
+;;   "Produce links from google search dom.
+;; DOM is a dom object of the google search, returns a list of links"
+;;   (let* ((my-divs (dom-by-class dom "jfp3ef"))
+;;          (my-a-tags (mapcar (lambda (a-div)
+;;                               (dom-attr (dom-child-by-tag a-div 'a) 'href))
+;;                             my-divs)))
+;;     (mapcar (lambda (it) (substring it 7))
+;;             (seq-filter (lambda (it) (if it t nil)) my-a-tags))))
+
+(defun howdoyou--extract-links-from-l-class (dom)
+  (let ((my-nodes (dom-by-class dom "^l$")))
+    (mapcar (lambda (a-node)
+              (dom-attr a-node 'href))
+            my-nodes)))
+
+(defun howdoyou--extract-links-from-r-class (dom)
+  (let ((my-nodes (dom-by-class dom "^r$")))
+    (mapcar (lambda (a-node)
+              (dom-attr (dom-child-by-tag a-node 'a) 'href))
+            my-nodes)))
+
+(defun howdoyou--extract-links-from-google (dom)
   "Produce links from google search dom.
 DOM is a dom object of the google search, returns a list of links"
-  (let* ((my-divs (dom-by-class dom "jfp3ef"))
-         (my-a-tags (mapcar (lambda (a-div)
-                              (dom-attr (dom-child-by-tag a-div 'a) 'href))
-                            my-divs)))
-    (mapcar (lambda (it) (substring it 7))
-            (seq-filter (lambda (it) (if it t nil)) my-a-tags))))
+  (if-let ((links (howdoyou--extract-links-from-l-class dom)))
+      links
+    (howdoyou--extract-links-from-r-class dom)))
+
+(setq url-user-agent "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0")
 
 (defun howdoyou--promise-dom (url)
   "Promise a cons (URL . dom).
@@ -83,7 +104,7 @@ URL is a link string. Download the url and parse it to a DOM object"
                       (url-hexify-string "site:askubunu.com"))))
     (promise-chain (howdoyou--promise-dom (concat url args))
       (then (lambda (result)
-              (howdoyou--google-to-links (cdr result))))
+              (howdoyou--extract-links-from-google (cdr result))))
       (then (lambda (links)
               ;; (message "%s" links)
               (setq thanh links)
@@ -146,7 +167,7 @@ Return (url title question answers scores tags)"
         (read-only-mode -1)
         (erase-buffer)
         (insert "#+STARTUP: overview indent\n#+TITLE: " title "\n")
-        (insert (replace-regexp-in-string "&.*$" "" url)) ;; url
+        (insert url) ;; url
         (insert (format "\n* Question (%s)" question-score))
         (howdoyou--print-dom question)
         (insert "\nTags: ")
