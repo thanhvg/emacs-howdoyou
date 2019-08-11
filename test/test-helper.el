@@ -1,6 +1,6 @@
 ;;; test-helper.el --- Helpers for howdoyou-test.el
 (require 'f)
-;; (require 'ert-async)
+(require 'ert-async)
 
 (defvar root-test-path
   (f-dirname (f-this-file)))

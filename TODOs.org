@@ -28,18 +28,20 @@ now the lines are long and double white spaces
 how about modify the dom directly
 * DONE dom is just a tree 
 walk this dom and if it's an a tag, replace it* dom is just a tree 
+
+(pre nil (code nil int x; x = 10;))
 * DONE manipulate dom all in one
 to drop the insert example org
 * DONE print 3 answers and scores
 * DONE show only first answer, collapse other
-* TODO better error handle
+* DONE better error handle
 uncompressing publicsuffix.txt.gz...done
 
 * DONE image inside a tag should be ignore
 * DONE include question title
 class: question-hyperlink
 * TODO packaging
-* user agent
+* DONE user agent
 test url
 https://www.google.com/search?q=curl%20 what ever
 
@@ -56,3 +58,5 @@ because of this it can figure out you're not using a browser and ban you later
 
 
 
+* TODO use curl 
+directly use of curl is hard, use request which is an abtraction over curl

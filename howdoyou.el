@@ -28,6 +28,8 @@
 (require 'promise)
 (require 'dom)
 (require 'cl-lib)
+(require 'request)
+
 ;; (require 'org)
 
 (defun howdoyou--extract-links-from-l-class (dom)
@@ -51,11 +53,39 @@ DOM is a dom object of the google search, returns a list of links"
       links
     (howdoyou--extract-links-from-r-class dom)))
 
+;; (defun howdoyou--curl-promise-dom (url)
+;;   "use curl to pormise a dom from url."
+;;   (promise-new
+;;    (lambda (resolve reject)
+;;      (with-temp-buffer
+;;        (let ((url-user-agent (howdoyou--get-user-agent))
+;;              (sentinel (lambda (process msg)
+;;                          (when (memq (process-status process) '(exit signal))
+;;                            ;; (message (concat (process-name process) " - " msg))
+;;                            ;; (message "%s" (buffer-string))
+;;                            (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))))
+;;          (set-process-sentinel (start-process-shell-command
+;;                                 "howdoi-curl"
+;;                                 (current-buffer)
+;;                                 (format "curl -i %s" url))
+;;                                sentinel))))))
 
-(defun howdoyou--promise-dom (url)
+(defun howdoyou--curl-promise-dom (url)
+  (promise-new
+   (lambda (resolve reject)
+     (request url
+              :parser (lambda () (libxml-parse-html-region (point-min) (point-max)))
+              :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+                             (funcall reject  error-thrown)))
+              :success (cl-function (lambda (&key data &allow-other-keys)
+                          (funcall resolve (cons url data))))))))
+
+(defvar howdoyou--use-curl nil)
+
+(defun howdoyou--url-promise-dom (url)
   "Promise a cons (URL . dom).
 URL is a link string. Download the url and parse it to a DOM object"
-  (message "%s" url)
+  ;; (message "%s" url)
   (promise-new
    (lambda (resolve reject)
      (let ((url-user-agent (howdoyou--get-user-agent)))
@@ -67,9 +97,15 @@ URL is a link string. Download the url and parse it to a DOM object"
                              (with-current-buffer (current-buffer)
                                (if (not (url-http-parse-headers))
                                    (funcall reject (buffer-string))
-                                 (setq thanh-web (buffer-string))
+                                 ;; (setq thanh-web (buffer-string))
                                  (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))
                            (error (funcall reject ex))))))))))
+
+(defun howdoyou--promise-dom (url)
+  "Promise a cons (URL . dom).
+URL is a link string. Download the url and parse it to a DOM object"
+  (if howdoyou--use-curl (howdoyou--curl-promise-dom url)
+    (howdoyou--url-promise-dom url)))
 
 (defvar howdoyou--current-user-agent 0)
 
@@ -81,8 +117,10 @@ URL is a link string. Download the url and parse it to a DOM object"
     "Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46  Safari/536.5"))
 
 (defun howdoyou--get-user-agent ()
+  "Roate user agent from `howdoyou--user-agents'."
   (let ((user-agent (nth howdoyou--current-user-agent howdoyou--user-agents)))
-    (setq howdoyou--current-user-agent (if (>= howdoyou--current-user-agent (length howdoyou--user-agents))
+    (setq howdoyou--current-user-agent (if (>= howdoyou--current-user-agent
+                                               (length howdoyou--user-agents))
                                            0
                                          (1+ howdoyou--current-user-agent)))
     user-agent))
@@ -113,11 +151,11 @@ URL is a link string. Download the url and parse it to a DOM object"
                       "&hl=en")))
     (promise-chain (howdoyou--promise-dom (concat url args))
       (then (lambda (result)
-              (setq thanh-dom (cdr result))
+              ;; (setq thanh-dom (cdr result))
               (howdoyou--extract-links-from-google (cdr result))))
       (then (lambda (links)
               ;; (message "%s" links)
-              (setq thanh links)
+              ;; (setq thanh links)
               (setq howdoyou--links links)
               (setq howdoyou--current-link-index 0)
               (howdoyou--promise-dom (car links))))
@@ -217,7 +255,10 @@ a, img or pre. Othewise just copy"
               (dom-texts it)
               "]]"))
      ((equal (car it) 'pre)
-      (append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
+      `(pre nil "#+begin_example " ,howdoyou--current-lang "\n" ,(nthcdr 2 it) "\n#+end_example"))
+     ;; `(div nil (p nil "#+begin_example " ,howdoyou--current-lang "\n")
+     ;;       ,it
+     ;;       "#+end_example"))
      (t (mapcar #'howdoyou--it-to-it it))))
    (t it)))
 
