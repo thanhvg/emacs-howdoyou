@@ -53,34 +53,19 @@ DOM is a dom object of the google search, returns a list of links"
       links
     (howdoyou--extract-links-from-r-class dom)))
 
-;; (defun howdoyou--curl-promise-dom (url)
-;;   "use curl to pormise a dom from url."
-;;   (promise-new
-;;    (lambda (resolve reject)
-;;      (with-temp-buffer
-;;        (let ((url-user-agent (howdoyou--get-user-agent))
-;;              (sentinel (lambda (process msg)
-;;                          (when (memq (process-status process) '(exit signal))
-;;                            ;; (message (concat (process-name process) " - " msg))
-;;                            ;; (message "%s" (buffer-string))
-;;                            (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))))
-;;          (set-process-sentinel (start-process-shell-command
-;;                                 "howdoi-curl"
-;;                                 (current-buffer)
-;;                                 (format "curl -i %s" url))
-;;                                sentinel))))))
-
 (defun howdoyou--curl-promise-dom (url)
   (promise-new
    (lambda (resolve reject)
-     (request url
-              :parser (lambda () (libxml-parse-html-region (point-min) (point-max)))
-              :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                             (funcall reject  error-thrown)))
-              :success (cl-function (lambda (&key data &allow-other-keys)
-                          (funcall resolve (cons url data))))))))
+     ;; shadow reject-curl-options to have user agent
+     (let ((request-curl-options `(,(format "-A %s" (howdoyou--get-user-agent)))))
+       (request url
+               :parser (lambda () (libxml-parse-html-region (point-min) (point-max)))
+               :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+                                     (funcall reject  error-thrown)))
+               :success (cl-function (lambda (&key data &allow-other-keys)
+                                       (funcall resolve (cons url data)))))))))
 
-(defvar howdoyou--use-curl nil)
+(defvar howdoyou--use-curl t)
 
 (defun howdoyou--url-promise-dom (url)
   "Promise a cons (URL . dom).
