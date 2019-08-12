@@ -56,7 +56,28 @@ the trick (dom-by-class dom "jfp3ef") will only work on this case.
 
 because of this it can figure out you're not using a browser and ban you later
 
-
-
 * TODO use curl 
 directly use of curl is hard, use request which is an abtraction over curl
+* bug parsing
+query: elisp check if buffers are the same 
+links https://stackoverflow.com/questions/586735/how-can-i-check-if-a-current-buffer-exists-in-emacs
+
+eval triggered:
+
+catch the error: (wrong-type-argument symbolp 
+(get-buffer name)
+
+Return the buffer named name (a string).
+If there is no live buffer named name, return nil.
+name may also be a buffer; if so, the value is that buffer.
+
+(get-buffer-create name)
+
+Return the buffer named name, or create such a buffer and return it.
+A new buffer is created if there is no live buffer named name.
+If name starts with a space, the new buffer does not keep undo information.
+If name is a buffer instead of a string, then it is the value returned.
+The value is never nil.
+)
+
+probably when code sections look like lisp code
