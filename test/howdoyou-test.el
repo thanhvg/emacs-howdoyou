@@ -35,4 +35,23 @@
              (funcall done)))
      (promise-catch done))))
 
+
+(ert-deftest-async test/promise-sk-print-01 (done)
+                   (promise-done
+                    (promise-chain
+                        (howdoyou-read-so-link "https://stackoverflow.com/questions/8425102/how-do-i-load-my-script-into-the-node-js-repl")
+                      (then (lambda (result)
+                              (should (equal result (get-buffer "*How Do You*")))
+                              (funcall done)))
+                      (promise-catch done))))
+
+(ert-deftest-async test/promise-sk-print (done)
+                   (promise-done
+                    (promise-chain
+                        (howdoyou-read-so-link "https://stackoverflow.com/questions/586735/how-can-i-check-if-a-current-buffer-exists-in-emacs")
+                      (then (lambda (result)
+                              (should (equal result (get-buffer "*How Do You*")))
+                              (funcall done)))
+                      (promise-catch done))))
+
 ;;; howdoyou-test.el ends here
