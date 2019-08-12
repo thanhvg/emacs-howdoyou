@@ -234,6 +234,7 @@ Return (url title question answers scores tags)"
                      (howdoyou--print-dom a))
                    answers
                    answer-scores)
+        (delete-trailing-whitespace)
         (org-mode)
         (goto-char (point-min)))
       (pop-to-buffer howdoi-buffer))))
@@ -242,6 +243,17 @@ Return (url title question answers scores tags)"
   "Print the DOM."
   (let ((shr-bullet "- ")) ;; insead of *
     (shr-insert-document dom)))
+
+(defun howdoyou--pre-class-name-to-lang (class-name)
+  "Return language name from CLASS-NAME.
+CLASS-NAME has lang-name => name.
+CLASS-NAME has default => `howdoyou--current-lang'.
+CLASS-NAME has nothing => empty string"
+  (cond
+   ((not (stringp class-name)) "")
+   ((string-match "lang-\\b\\(.+?\\)\\b" class-name)
+    (match-string 1 class-name))
+   (t howdoyou--current-lang)))
 
 (defun howdoyou--it-to-it (it)
   "Map node to node.
@@ -258,9 +270,16 @@ a, img or pre. Othewise just copy"
               "]["
               (dom-texts it)
               "]]"))
+     ;; ((and (equal (dom-tag it) 'div)
+     ;;       (equal (dom-attr it 'class) "snippet"))
+     ;;  (mapcar #'howdoyou--it-to-it (dom-by-tag it 'pre)))
      ((equal (car it) 'pre)
-      `(pre nil "#+begin_example " ,howdoyou--current-lang "\n" ,@(nthcdr 2 it) "#+end_example"))
-      ;; (append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
+      `(pre nil "#+begin_example "
+            ,howdoyou--current-lang "\n" ,@(nthcdr 2 it)
+            ,(if (dom-attr it 'class)
+                "\n#+end_example"
+              "#+end_example")))
+     ;; (append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
      (t (mapcar #'howdoyou--it-to-it it))))
    (t it)))
 

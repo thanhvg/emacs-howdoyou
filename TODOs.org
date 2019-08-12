@@ -40,7 +40,7 @@ uncompressing publicsuffix.txt.gz...done
 * DONE image inside a tag should be ignore
 * DONE include question title
 class: question-hyperlink
-* TODO packaging
+* DONE packaging
 * DONE user agent
 test url
 https://www.google.com/search?q=curl%20 what ever
@@ -56,9 +56,9 @@ the trick (dom-by-class dom "jfp3ef") will only work on this case.
 
 because of this it can figure out you're not using a browser and ban you later
 
-* TODO use curl 
+* DONE use curl 
 directly use of curl is hard, use request which is an abtraction over curl
-* bug parsing
+* DONE bug parsing
 query: elisp check if buffers are the same 
 links https://stackoverflow.com/questions/586735/how-can-i-check-if-a-current-buffer-exists-in-emacs
 
@@ -108,3 +108,16 @@ bug was due to returning double pathenthese which shr-insert-document will compl
 (append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
 => (pre nil #begin... (code nil ...) #end..)
 #+end_example
+* DONE parse example
+https://stackoverflow.com/questions/208105/how-do-i-remove-a-property-from-a-javascript-object
+* TODO better guest the lang 
+<pre class="default prettyprint prettyprinted" style=""></pre>
+
+<pre class="lang-js prettyprint prettyprinted" style=""></pre>
+
+if class is lang use lang
+if default use tag 
+if none use none
+
+imposible because the class attribute is added later by js
+
