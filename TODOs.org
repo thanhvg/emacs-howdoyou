@@ -81,3 +81,30 @@ The value is never nil.
 )
 
 probably when code sections look like lisp code
+
+#+begin_src 
+(pre nil #+begin_example  emacs 
+ ((code nil (if (buffer-exists "my-buffer-name")
+    ; do something
+ )
+)) 
+#+end_example)
+#+end_src
+
+
+#+begin_src 
+(pre nil #+begin_example  emacs 
+ (code nil (if (buffer-exists "my-buffer-name")
+    ; do something
+ )
+) #+end_example)
+#+end_src
+
+bug was due to returning double pathenthese which shr-insert-document will complain
+#+begin_example
+`(pre nil "#+begin_example " ,howdoyou--current-lang "\n" ,(nthcdr 2 it) "\n#+end_example"))
+=> (pre nil #begin... ((code nil ...)) #end..)
+
+(append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
+=> (pre nil #begin... (code nil ...) #end..)
+#+end_example

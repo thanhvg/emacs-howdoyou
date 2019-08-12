@@ -259,8 +259,8 @@ a, img or pre. Othewise just copy"
               (dom-texts it)
               "]]"))
      ((equal (car it) 'pre)
-      ;; `(pre nil "#+begin_example " ,howdoyou--current-lang "\n" ,(nthcdr 2 it) "\n#+end_example"))
-      (append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
+      `(pre nil "#+begin_example " ,howdoyou--current-lang "\n" ,@(nthcdr 2 it) "#+end_example"))
+      ;; (append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
      (t (mapcar #'howdoyou--it-to-it it))))
    (t it)))
 
