@@ -270,6 +270,7 @@ a, img or pre. Othewise just copy"
   "Map new dom from DOM and print it."
   (howdoyou--print-node (mapcar #'howdoyou--it-to-it dom)))
 
+;;;###autoload
 (defun howdoyou-query (query)
   "Prompt for QUERY and search for answer.
 Pop up *How Do You* buffer to show the answer."
@@ -299,11 +300,13 @@ Pop up *How Do You* buffer to show the answer."
     (promise-catch (lambda (reason)
                      (message "catch the error: %s" reason)))))
 
+;;;###autoload
 (defun howdoyou-next-link ()
   "Go to next link stored in google search."
   (interactive)
   (howdoyou-n-link 1))
 
+;;;###autoload
 (defun howdoyou-previous-link ()
   "Go to previous link stored in google search."
   (interactive)
