@@ -35,9 +35,28 @@
 (defun howdoyou--extract-links-from-l-class (dom)
   "Extract links in l class from DOM."
   (let ((my-nodes (dom-by-class dom "^l$")))
-    (mapcar (lambda (a-node)
-              (dom-attr a-node 'href))
-            my-nodes)))
+    (cond
+     ((not my-nodes) nil)
+     ((= 1 (length my-nodes))
+      (howdoyou--extract-links-from-bot-class dom))
+     (t
+      (mapcar (lambda (a-node)
+                (dom-attr a-node 'href))
+              my-nodes)))))
+
+(defun howdoyou--extract-links-from-bot-class (dom)
+  "Extract links in kCrYT class from DOM."
+  (let* ((my-nodes (dom-by-class dom "^kCrYT$"))
+         (my-a-tags (mapcar (lambda (a-node)
+                              (dom-attr (dom-child-by-tag a-node 'a) 'href))
+                            my-nodes)))
+    (seq-reduce (lambda (acc it)
+                  ;; drop nil and trim the url string off crap
+                  (if (and (stringp it)
+                           (string-match "^/url\\?q=\\(.*?\\)&.*$" it))
+                      (nconc acc `(,(match-string 1 it)))
+                    acc))
+                my-a-tags '())))
 
 (defun howdoyou--extract-links-from-r-class (dom)
   "Extract links inside r class from DOM."
@@ -59,11 +78,11 @@ DOM is a dom object of the google search, returns a list of links"
      ;; shadow reject-curl-options to have user agent
      (let ((request-curl-options `(,(format "-A %s" (howdoyou--get-user-agent)))))
        (request url
-               :parser (lambda () (libxml-parse-html-region (point-min) (point-max)))
-               :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                                     (funcall reject  error-thrown)))
-               :success (cl-function (lambda (&key data &allow-other-keys)
-                                       (funcall resolve (cons url data)))))))))
+                :parser (lambda () (libxml-parse-html-region (point-min) (point-max)))
+                :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+                                      (funcall reject  error-thrown)))
+                :success (cl-function (lambda (&key data &allow-other-keys)
+                                        (funcall resolve (cons url data)))))))))
 
 (defvar howdoyou--use-curl t)
 
