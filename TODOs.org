@@ -121,3 +121,10 @@ if none use none
 
 imposible because the class attribute is added later by js
 
+* TODO on fisrt opening, text line is not wrapped 
+maybe pop buffer first so it has a size move pop-to-buffers won't solve this but
+make the buffer wrapped not in window but a full with window (or full screen?)
+
+how about pop window showing "getting ..." then fill it later just like what we did 
+in javascript
+

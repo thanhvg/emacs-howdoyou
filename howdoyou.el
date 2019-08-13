@@ -188,6 +188,8 @@ URL is a link string. Download the url and parse it to a DOM object"
 
 (defun howdoyou-promise-answer (query)
   "Process QUERY and print answers to *How Do You* buffer."
+  (save-selected-window
+    (pop-to-buffer (get-buffer-create "*How Do You*")))
   (let ((url "https://www.google.com/search")
         (args (concat "?q="
                       (url-hexify-string query)
@@ -260,6 +262,7 @@ Return (url title question answers scores tags)"
     ;; (setq thanh-scores scores)
     (setq howdoyou--current-lang lang)
     (save-selected-window
+      (pop-to-buffer howdoi-buffer)
       (with-current-buffer howdoi-buffer
         (read-only-mode -1)
         (erase-buffer)
@@ -281,8 +284,7 @@ Return (url title question answers scores tags)"
                    answer-scores)
         (delete-trailing-whitespace)
         (org-mode)
-        (goto-char (point-min)))
-      (pop-to-buffer howdoi-buffer))))
+        (goto-char (point-min))))))
 
 (defun howdoyou--print-node (dom)
   "Print the DOM."
