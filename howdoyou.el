@@ -22,16 +22,80 @@
 
 ;;; Commentary:
 
-;; Put a description of the package here
+;; This package is inspired by howdoi python and howdoi Emacs package. it
+;; searches your query all stackoverflow and it's sisters' sites. They are:
+;; stackoverflow.com, stackexchange.com, superuser.com, serverfault.com and
+;; askubunu.com. The result is then showed in an org-mode buffer. For each
+;; result, question and three answers were showed, but they are collapsed by
+;; default except the first answer. As this pacakge use Google to get the links
+;; For each query there will be a dozen of links, the fist link will be used,
+;; but then use can go to next link and previous link.
+;; The author believes that when searching for solutions it is important for
+;; users to read both questions and answers. So "quick look" features such as
+;; code only view or code completion are provided.
+
+;;; Dependencies
+;; promise.el and request.el are required.
+;; user must have org-mode 9.2 or later installed also.
+
+;;; Commands
+;; howdoyou-query:             prompt for query and do search
+;; howdoyou-next-query:        go to next link
+;; howdoyou-previous-query:    go to previous link
+
+;;; Customization
+;; howdoyou-use-curl:          default is true if curl is available
+;; howdoyou-number-of-answers: maximal number of answers to show, default is 3
 
 ;;; Code:
 (require 'promise)
 (require 'dom)
 (require 'cl-lib)
 (require 'request)
-
 ;; (require 'org)
 
+;; public variables
+(defgroup howdoyou nil
+  "Search and read stackoverflow and sisters's sites."
+  :group 'extensions
+  :group 'convenience
+  :version "25.1"
+  :link '(emacs-commentary-link "howdoyou.el"))
+
+(defcustom howdoyou-use-curl (if (executable-find request-curl)
+                                 t
+                               nil)
+  "Use curl instead of buggy `url-retrieve'."
+  :type 'boolean
+  :group 'howdoyou)
+
+(defcustom howdoyou-number-of-answers 3
+  "Number of maximal answers to show."
+  :type 'number
+  :group 'howdoyou)
+
+;; private variables
+(defvar howdoyou--current-link-index 0
+  "Current index of link.")
+
+(defvar howdoyou--links nil
+  "List of so links from google search.")
+
+(defvar howdoyou--current-lang nil
+  "Guested language.")
+
+(defvar howdoyou--current-user-agent 0
+  "Index to be rotated.")
+
+(defvar howdoyou--user-agents
+  '("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0"
+    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0"
+    "Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0"
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5"
+    "Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5")
+  "List of user agent to make Google happy.")
+
+;; functions
 (defun howdoyou--extract-links-from-l-class (dom)
   "Extract links in l class from DOM."
   (let ((my-nodes (dom-by-class dom "^l$")))
@@ -73,6 +137,7 @@ DOM is a dom object of the google search, returns a list of links"
     (howdoyou--extract-links-from-r-class dom)))
 
 (defun howdoyou--curl-promise-dom (url)
+  "Promise (url . dom) from URL with curl."
   (promise-new
    (lambda (resolve reject)
      ;; shadow reject-curl-options to have user agent
@@ -83,8 +148,6 @@ DOM is a dom object of the google search, returns a list of links"
                                       (funcall reject  error-thrown)))
                 :success (cl-function (lambda (&key data &allow-other-keys)
                                         (funcall resolve (cons url data)))))))))
-
-(defvar howdoyou--use-curl t)
 
 (defun howdoyou--url-promise-dom (url)
   "Promise a cons (URL . dom).
@@ -108,17 +171,9 @@ URL is a link string. Download the url and parse it to a DOM object"
 (defun howdoyou--promise-dom (url)
   "Promise a cons (URL . dom).
 URL is a link string. Download the url and parse it to a DOM object"
-  (if howdoyou--use-curl (howdoyou--curl-promise-dom url)
+  (if howdoyou-use-curl (howdoyou--curl-promise-dom url)
     (howdoyou--url-promise-dom url)))
 
-(defvar howdoyou--current-user-agent 0)
-
-(defvar howdoyou--user-agents
-  '("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0"
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0"
-    "Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0"
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5"
-    "Mozilla/5.0 (Windows; Windows NT 6.1) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46  Safari/536.5"))
 
 (defun howdoyou--get-user-agent ()
   "Roate user agent from `howdoyou--user-agents'."
@@ -128,18 +183,6 @@ URL is a link string. Download the url and parse it to a DOM object"
                                            0
                                          (1+ howdoyou--current-user-agent)))
     user-agent))
-
-(defvar howdoyou--links nil
-  "List of so links from google search.")
-
-(defvar howdoyou--current-link-index 0
-  "Current index of link.")
-
-(defvar howdoyou--current-lang nil
-  "Guested language.")
-
-(defvar howdoyou--number-of-answers 3
-  "Number of maximal answers to show.")
 
 (defun howdoyou-promise-answer (query)
   "Process QUERY and print answers to *How Do You* buffer."
@@ -182,8 +225,8 @@ Return (url title question answers scores tags)"
   (let* ((answer-nodes (dom-by-class (cdr result) "answercell"))
          (question-dom (car (dom-by-id (cdr result) "^question$")))
          (title (car (dom-by-class (cdr result) "question-hyperlink")))
-         (number-of-answers (if (> (length answer-nodes) howdoyou--number-of-answers)
-                                howdoyou--number-of-answers
+         (number-of-answers (if (> (length answer-nodes) howdoyou-number-of-answers)
+                                howdoyou-number-of-answers
                               (length answer-nodes)))
          (tags (howdoyou--get-so-tags (cdr result)))
          (score-nodes (dom-by-class (cdr result) "js-vote-count"))
@@ -277,8 +320,8 @@ a, img or pre. Othewise just copy"
       `(pre nil "#+begin_example "
             ,howdoyou--current-lang "\n" ,@(nthcdr 2 it)
             ,(if (dom-attr it 'class)
-                "\n#+end_example"
-              "#+end_example")))
+                 "\n#+end_example"
+               "#+end_example")))
      ;; (append `(pre nil "#+begin_example " ,howdoyou--current-lang "\n") (nthcdr 2 it) '("#+end_example")))
      (t (mapcar #'howdoyou--it-to-it it))))
    (t it)))
