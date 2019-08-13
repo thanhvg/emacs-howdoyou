@@ -1,0 +1,42 @@
+#+STARTUP:    align fold hidestars oddeven indent 
+#+TITLE: Emacs Howdoyou - A package to search and read stackoverflow and its sisters's sites
+
+[[file:screenshots/howdoyou.png]]
+
+* Intro
+
+This package is inspired by howdoi python and howdoi Emacs package. it searches
+your query all stackoverflow and it's sisters' sites. They are:
+- stackoverflow.com
+- stackexchange.com 
+- superuser.com
+- serverfault.com
+- askubunu.com
+
+The result is then showed in an org-mode buffer. For each result,
+question and three answers were showed, but they are collapsed by default except
+the first answer. As this pacakge use Google to get the links For each query
+there will be a dozen of links, the fist link will be used, but then use can go
+to next link and previous link. The author believes that when searching for
+solutions it is important for users to read both questions and answers. So
+"quick look" features such as code only view or code completion are provided.
+
+* Dependencies
+promise.el and request.el are required.
+user must have org-mode 9.2 or later installed also.
+
+* Commands
+howdoyou-query:             prompt for query and do search
+howdoyou-next-query:        go to next link
+howdoyou-previous-query:    go to previous link
+
+* Customization
+howdoyou-use-curl:          default is true if curl is available
+howdoyou-number-of-answers: maximal number of answers to show, default is 3
+
+* Demo
+
+[[file:screenshots/howdoyou.gif]]
+
+
+[[file:screenshots/howdoyou2.gif]]
