@@ -41,13 +41,15 @@
 ;; user must have `org-mode' 9.2 or later installed also.
 
 ;;; Commands
-;; howdoyou-query:             prompt for query and do search
-;; howdoyou-next-query:        go to next link
-;; howdoyou-previous-query:    go to previous link
+;; howdoyou-query:                 prompt for query and do search
+;; howdoyou-next-query:            go to next link
+;; howdoyou-previous-query:        go to previous link
+;; howdoyou-go-back-to-first-link: go back to first link
+;; howdoyou-reload-link:           reload link
 
 ;;; Customization
-;; howdoyou-use-curl:          default is true if curl is available
-;; howdoyou-number-of-answers: maximal number of answers to show, default is 3
+;; howdoyou-use-curl:              default is true if curl is available
+;; howdoyou-number-of-answers:     maximal number of answers to show, default is 3
 
 ;;; Code:
 (require 'promise)
@@ -186,10 +188,26 @@ URL is a link string. Download the url and parse it to a DOM object"
                                          (1+ howdoyou--current-user-agent)))
     user-agent))
 
+(defun howdoyou--get-buffer ()
+  "Get *How Do You* buffer."
+  (get-buffer-create "*How Do You*"))
+
+(defun howdoyou--print-waiting-message (&optional msg)
+  "Print MSG message and prepare window for howdoyou buffer."
+  (let ((howdoi-buffer (howdoyou--get-buffer)))
+    (when (not (equal (window-buffer) howdoi-buffer))
+      ;; (switch-to-buffer-other-window howdoi-buffer))
+      (display-buffer howdoi-buffer '(display-buffer-use-some-window (inhibit-same-window . t))))
+    (with-current-buffer howdoi-buffer
+      (read-only-mode -1)
+      (erase-buffer)
+      (insert (if msg
+                  msg
+                "Searching...")))))
+
 (defun howdoyou-promise-answer (query)
   "Process QUERY and print answers to *How Do You* buffer."
-  (save-selected-window
-    (pop-to-buffer (get-buffer-create "*How Do You*")))
+  (howdoyou--print-waiting-message)
   (let ((url "https://www.google.com/search")
         (args (concat "?q="
                       (url-hexify-string query)
@@ -247,7 +265,7 @@ Return (url title question answers scores tags)"
 
 (defun howdoyou--print-answer (answer-list)
   "Print ANSWER-LIST to *How Do You* buffer."
-  (let* ((howdoi-buffer (get-buffer-create "*How Do You*"))
+  (let* ((howdoi-buffer (howdoyou--get-buffer))
          (url (car answer-list))
          (title (nth 1 answer-list))
          (question (nth 2 answer-list))
@@ -261,30 +279,28 @@ Return (url title question answers scores tags)"
     ;; (setq thanh answers)
     ;; (setq thanh-scores scores)
     (setq howdoyou--current-lang lang)
-    (save-selected-window
-      (pop-to-buffer howdoi-buffer)
-      (with-current-buffer howdoi-buffer
-        (read-only-mode -1)
-        (erase-buffer)
-        (insert "#+STARTUP: overview indent\n#+TITLE: " title "\n")
-        (insert url) ;; url
-        (insert (format "\n* Question (%s)" question-score))
-        (howdoyou--print-dom question)
-        (insert "\nTags: ")
-        (dolist (tag tags)
-          (insert tag)
-          (insert " "))
-        (cl-mapcar (lambda (a s)
-                     (insert (format "\n* Answer (%s)" s))
-                     (when first-run
-                       (insert "\n:PROPERTIES:\n:VISIBILITY: all\n:END:\n")
-                       (setq first-run nil))
-                     (howdoyou--print-dom a))
-                   answers
-                   answer-scores)
-        (delete-trailing-whitespace)
-        (org-mode)
-        (goto-char (point-min))))))
+    (with-current-buffer howdoi-buffer
+      (read-only-mode -1)
+      (erase-buffer)
+      (insert "#+STARTUP: overview indent\n#+TITLE: " title "\n")
+      (insert url) ;; url
+      (insert (format "\n* Question (%s)" question-score))
+      (howdoyou--print-dom question)
+      (insert "\nTags: ")
+      (dolist (tag tags)
+        (insert tag)
+        (insert " "))
+      (cl-mapcar (lambda (a s)
+                   (insert (format "\n* Answer (%s)" s))
+                   (when first-run
+                     (insert "\n:PROPERTIES:\n:VISIBILITY: all\n:END:\n")
+                     (setq first-run nil))
+                   (howdoyou--print-dom a))
+                 answers
+                 answer-scores)
+      (delete-trailing-whitespace)
+      (org-mode)
+      (goto-char (point-min)))))
 
 (defun howdoyou--print-node (dom)
   "Print the DOM."
@@ -343,6 +359,7 @@ Pop up *How Do You* buffer to show the answer."
 
 (defun howdoyou-n-link (n)
   "Jump N steps in `howdoyou--links' and request and print the answer."
+  (howdoyou--print-waiting-message "Loading...")
   (setq howdoyou--current-link-index
         (if (and (<= (+ n howdoyou--current-link-index) (length howdoyou--links))
                  (>= (+ n howdoyou--current-link-index) 0))
@@ -376,5 +393,17 @@ Pop up *How Do You* buffer to show the answer."
   (interactive)
   (howdoyou-n-link -1))
 
+;;;###autoload
+(defun howdoyou-reload-link ()
+  "Reload current link in google search."
+  (interactive)
+  (howdoyou-n-link 0))
+
+;;;###autoload
+(defun howdoyou-go-back-to-first-link ()
+  "Reload current link in google search."
+  (interactive)
+  (howdoyou-n-link (- howdoyou--current-link-index)))
 (provide 'howdoyou)
+
 ;;; howdoyou.el ends here

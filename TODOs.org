@@ -1,4 +1,5 @@
 #+STARTUP:    align fold hidestars oddeven indent 
+#+SEQ_TODO:   TODO(t) INPROGRESS(i) | DONE(d) CANCELED(c)
 * DONE parse SO link
 * DONE use async await lib
 https://nullprogram.com/blog/2019/03/10/
@@ -110,7 +111,7 @@ bug was due to returning double pathenthese which shr-insert-document will compl
 #+end_example
 * DONE parse example
 https://stackoverflow.com/questions/208105/how-do-i-remove-a-property-from-a-javascript-object
-* TODO better guest the lang 
+* CANCELED better guest the lang 
 <pre class="default prettyprint prettyprinted" style=""></pre>
 
 <pre class="lang-js prettyprint prettyprinted" style=""></pre>
@@ -125,6 +126,13 @@ imposible because the class attribute is added later by js
 maybe pop buffer first so it has a size move pop-to-buffers won't solve this but
 make the buffer wrapped not in window but a full with window (or full screen?)
 
-how about pop window showing "getting ..." then fill it later just like what we did 
+* DONE how about pop window showing "getting ..." then fill it later just like what we did 
 in javascript
 
+* DONE window selection should be predictable
+- if *hdy* buffer window is currently select. Then use it 
+- it not then create new window other than the current one if there is only one window.
+
+get hdy buffer, get window having buffer, if window is seleted use it, otherwise use other window
+
+      (display-buffer howdoi-buffer '(display-buffer-use-some-window (inhibit-same-window . t))))
