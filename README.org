@@ -25,13 +25,13 @@ features such as code only view or code completion are provided.
 User must have ~org-mode~ 9.2 or later installed also.
 
 * Commands
-~howdoyou-query~:             prompt for query and do search
-~howdoyou-next-query~:        go to next link
-~howdoyou-previous-query~:    go to previous link
+- ~howdoyou-query:~             prompt for query and do search
+- ~howdoyou-next-query:~        go to next link
+- ~howdoyou-previous-query:~    go to previous link
 
 * Customization
-~howdoyou-use-curl~:          default is true if curl is available
-~howdoyou-number-of-answers~: maximal number of answers to show, default is 3
+- ~howdoyou-use-curl:~          default is true if curl is available
+- ~howdoyou-number-of-answers:~ maximal number of answers to show, default is 3
 
 * Demo
 
@@ -39,3 +39,8 @@ User must have ~org-mode~ 9.2 or later installed also.
 
 
 [[file:screenshots/howdoyou2.gif]]
+
+* References
+- https://github.com/gleitz/howdoi
+- https://github.com/lockie/emacs-howdoi
+- https://github.com/atykhonov/emacs-howdoi
