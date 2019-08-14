@@ -304,7 +304,9 @@ Return (url title question answers scores tags)"
 
 (defun howdoyou--print-node (dom)
   "Print the DOM."
-  (let ((shr-bullet "- ")) ;; insead of *
+  ;; shawdow some `shr' parameters
+  (let ((shr-bullet "- ") ;; insead of *
+        (shr-use-fonts nil)) ;; so shr-internal-width is correct on first run
     (shr-insert-document dom)))
 
 (defun howdoyou--pre-class-name-to-lang (class-name)

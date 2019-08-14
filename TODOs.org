@@ -122,9 +122,37 @@ if none use none
 
 imposible because the class attribute is added later by js
 
-* TODO on fisrt opening, text line is not wrapped 
+* DONE on fisrt opening, text line is not wrapped 
 maybe pop buffer first so it has a size move pop-to-buffers won't solve this but
 make the buffer wrapped not in window but a full with window (or full screen?)
+
+shawdow ~shr~ params shr-use-fonts nil so shr-internal-width will be calculated
+right on first run.
+
+#+begin_src elisp
+	(shr-internal-width (or (and shr-width
+				     (if (not shr-use-fonts)
+					 shr-width
+				       (* shr-width (frame-char-width))))
+                                ;; We need to adjust the available
+                                ;; width for when the user disables
+                                ;; the fringes, which will cause the
+                                ;; display engine usurp one column for
+                                ;; the continuation glyph.
+;;=> WE WANT THIS ROUTE
+				(if (not shr-use-fonts)
+				    (- (window-body-width) 1
+                                       (if (and (null shr-width)
+                                                (not (shr--have-one-fringe-p)))
+                                           0
+                                         1))
+				  (- (window-body-width nil t)
+                                     (* 2 (frame-char-width))
+                                     (if (and (null shr-width)
+                                              (not (shr--have-one-fringe-p)))
+                                         (* (frame-char-width) 2)
+                                       0)))))
+#+end_src
 
 * DONE how about pop window showing "getting ..." then fill it later just like what we did 
 in javascript
