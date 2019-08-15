@@ -164,3 +164,19 @@ in javascript
 get hdy buffer, get window having buffer, if window is seleted use it, otherwise use other window
 
       (display-buffer howdoi-buffer '(display-buffer-use-some-window (inhibit-same-window . t))))
+* DONE links conflict with line breaks
+links in org mode are longer so shr line breaks will be not correct
+
+on shr when iterate, if see a convertable links
+give out
+#+begin_example
+[[ ttt ][index]]
+[[ ttt ][0]]
+[[ ttt ][1]]
+#+end_example
+and put the links in a index variable
+then another function will run through the buffer and do a search and replace
+it's possible but too much of work and make the code fragile
+
+how about shr width is infinitive and 
+turn on visual line mode and your buffer will be responsive, this is the right way 

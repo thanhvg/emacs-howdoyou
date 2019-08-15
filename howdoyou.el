@@ -25,7 +25,7 @@
 ;; This package is inspired by python howdoi (https://github.com/gleitz/howdoi)
 ;; and howdoi Emacs package (https://github.com/lockie/emacs-howdoi and
 ;; https://github.com/atykhonov/emacs-howdoi). it searches your query all
-;; accross stackoverflow and it's sisters' sites. They are: stackoverflow.com,
+;; accross stackoverflow and its sisters' sites. They are: stackoverflow.com,
 ;; stackexchange.com, superuser.com, serverfault.com and askubunu.com. The
 ;; result is then showed in an `org-mode' buffer. For each result, the question
 ;; and three answers were showed, but they are collapsed by default except the
@@ -300,12 +300,14 @@ Return (url title question answers scores tags)"
                  answer-scores)
       (delete-trailing-whitespace)
       (org-mode)
+      (visual-line-mode)
       (goto-char (point-min)))))
 
 (defun howdoyou--print-node (dom)
   "Print the DOM."
   ;; shawdow some `shr' parameters
   (let ((shr-bullet "- ") ;; insead of *
+        (shr-width most-positive-fixnum) ;; no more line breaks
         (shr-use-fonts nil)) ;; so shr-internal-width is correct on first run
     (shr-insert-document dom)))
 
