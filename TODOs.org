@@ -180,3 +180,38 @@ it's possible but too much of work and make the code fragile
 
 how about shr width is infinitive and 
 turn on visual line mode and your buffer will be responsive, this is the right way 
+* DONE bug: catch the error: (error Memory exhausted--use C-x s then exit and restart Emacs)
+query: posgresql upsert
+https://stackoverflow.com/questions/17267417/how-to-upsert-merge-insert-on-duplicate-update-in-postgresql
+
+something with shr-insert-document
+when no bindings it works
+
+(defun howdoyou--print-node (dom)
+  (shr-insert-document dom))
+
+with shadow bindings it crashes
+
+(defun howdoyou--print-node (dom)
+  "Print the DOM."
+  ;; shawdow some `shr' parameters
+  (let ((shr-bullet "- ") ;; insead of *
+        (shr-width most-positive-fixnum) ;; no more line breaks
+        (shr-use-fonts nil)) ;; so shr-internal-width is correct on first run
+    (shr-insert-document dom)))
+
+that would be the parsing with code     
+
+no shr-insert-document crashes
+
+(shr-width most-positive-fixnum)
+
+no it's shr-use-fonts nil
+(let ((shr-bullet "- ") (shr-width most-positive-fixnum) (shr-use-fonts nil)) (shr-insert-document thanh))
+Eval error ***  Memory exhausted--use C-x s then exit and restart Emacs
+when both of them combined
+
+set shr-width to 0 or negative will disable line breaks in a sure way
+
+(defun shr-fill-lines (start end)
+  (if (<= shr-internal-width 0)

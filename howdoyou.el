@@ -232,7 +232,7 @@ URL is a link string. Download the url and parse it to a DOM object"
       (then #'howdoyou--promise-so-answer)
       (then #'howdoyou--print-answer)
       (promise-catch (lambda (reason)
-                       (message "catch the error: %s" reason))))))
+                       (message "catch error in promise answer: %s" reason))))))
 
 (defun howdoyou--get-so-tags (dom)
   "Extract list of tags from stackoverflow DOM."
@@ -304,12 +304,18 @@ Return (url title question answers scores tags)"
       (visual-line-mode)
       (goto-char (point-min)))))
 
+;; (defun howdoyou--print-node (dom)
+;;   "print the dom."
+;;   (insert (format "%s" (dom-texts dom))))
+
 (defun howdoyou--print-node (dom)
-  "Print the DOM."
+  "print the dom."
   ;; shawdow some `shr' parameters
   (let ((shr-bullet "- ") ;; insead of *
-        (shr-width most-positive-fixnum) ;; no more line breaks
-        (shr-use-fonts nil)) ;; so shr-internal-width is correct on first run
+        ;; no more line breaks
+        (shr-width 0) 
+        ;; because we use fixed width anyway, save some computations
+        (shr-use-fonts nil)) 
     (shr-insert-document dom)))
 
 (defun howdoyou--pre-class-name-to-lang (class-name)
@@ -376,7 +382,7 @@ Pop up *How Do You* buffer to show the answer."
     (then #'howdoyou--promise-so-answer)
     (then #'howdoyou--print-answer)
     (promise-catch (lambda (reason)
-                     (message "catch the error: %s" reason)))))
+                     (message "catch error in n-link: %s" reason)))))
 
 (defun howdoyou-read-so-link (link)
   "Read stackoverflow LINK in buffer."
@@ -384,7 +390,7 @@ Pop up *How Do You* buffer to show the answer."
     (then #'howdoyou--promise-so-answer)
     (then #'howdoyou--print-answer)
     (promise-catch (lambda (reason)
-                     (message "catch the error: %s" reason)))))
+                     (message "catch error in so-link: %s" reason)))))
 
 ;;;###autoload
 (defun howdoyou-next-link ()
