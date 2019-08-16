@@ -56,6 +56,7 @@
 (require 'dom)
 (require 'cl-lib)
 (require 'request)
+(require 'shr)
 ;; (require 'org)
 
 ;; public variables
