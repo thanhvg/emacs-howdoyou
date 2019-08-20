@@ -4,7 +4,7 @@
 
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/howdoyou/
-;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0"))
+;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
 ;; Version: 0.1
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -57,7 +57,7 @@
 (require 'cl-lib)
 (require 'request)
 (require 'shr)
-;; (require 'org)
+(require 'org)
 
 ;; public variables
 (defgroup howdoyou nil
