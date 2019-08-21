@@ -304,18 +304,14 @@ Return (url title question answers scores tags)"
       (visual-line-mode)
       (goto-char (point-min)))))
 
-;; (defun howdoyou--print-node (dom)
-;;   "print the dom."
-;;   (insert (format "%s" (dom-texts dom))))
-
 (defun howdoyou--print-node (dom)
-  "print the dom."
+  "Print the DOM."
   ;; shawdow some `shr' parameters
   (let ((shr-bullet "- ") ;; insead of *
         ;; no more line breaks
-        (shr-width 0) 
+        (shr-width 0)
         ;; because we use fixed width anyway, save some computations
-        (shr-use-fonts nil)) 
+        (shr-use-fonts nil))
     (shr-insert-document dom)))
 
 (defun howdoyou--pre-class-name-to-lang (class-name)
@@ -415,6 +411,6 @@ Pop up *How Do You* buffer to show the answer."
   "Reload current link in google search."
   (interactive)
   (howdoyou-n-link (- howdoyou--current-link-index)))
-(provide 'howdoyou)
 
+(provide 'howdoyou)
 ;;; howdoyou.el ends here
