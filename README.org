@@ -1,11 +1,11 @@
 #+STARTUP:    align fold hidestars oddeven indent 
-#+TITLE: Emacs Howdoyou - A package to search and read stackoverflow and its sisters's sites
+#+TITLE: Emacs Howdoyou - A package to search and read stackoverflow and its sisters' sites
 
 [[file:screenshots/howdoyou.png]]
 
 * Intro
-This package is inspired by howdoi python and howdoi Emacs package. it searches
-your query all accross stackoverflow and it's sisters' sites. They are:
+This package is inspired by howdoi python and howdoi Emacs packages. it searches
+your query all across stackoverflow and it's sisters' sites. They are:
 - stackoverflow.com
 - stackexchange.com 
 - superuser.com
