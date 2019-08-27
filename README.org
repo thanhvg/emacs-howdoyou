@@ -1,6 +1,8 @@
 #+STARTUP:    align fold hidestars oddeven indent 
 #+TITLE: Emacs Howdoyou - A package to search and read stackoverflow and its sisters' sites
 
+[[http://spacemacs.org][file:https://cdn.rawgit.com/syl20bnr/spacemacs/442d025779da2f62fc86c2082703697714db6514/assets/spacemacs-badge.svg]]
+
 [[file:screenshots/howdoyou.png]]
 
 * Intro
@@ -19,6 +21,14 @@ be a dozen of links, the fist link will be used, then use can go to next
 link and previous link. The author believes that when searching for solutions it
 is important for users to read both questions and answers, so no "quick look"
 features such as code only view or code completion are provided.
+* Install
+MELPA recipe pending
+https://github.com/melpa/melpa/pull/6394
+
+Spacemacs layer:
+https://github.com/thanhvg/spacemacs-eos
+
+Manual: TBD
 
 * Dependencies
 ~promise~ and ~request~ are required.

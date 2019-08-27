@@ -21,7 +21,6 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
 ;; This package is inspired by python howdoi (https://github.com/gleitz/howdoi)
 ;; and howdoi Emacs package (https://github.com/lockie/emacs-howdoi and
 ;; https://github.com/atykhonov/emacs-howdoi). it searches your query all
