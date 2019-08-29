@@ -282,7 +282,7 @@ Return (url title question answers scores tags)"
     (with-current-buffer howdoi-buffer
       (read-only-mode -1)
       (erase-buffer)
-      (insert "#+STARTUP: overview indent\n#+TITLE: " title "\n")
+      (insert "#+STARTUP: overview\n#+TITLE: " title "\n")
       (insert url) ;; url
       (insert (format "\n* Question (%s)" question-score))
       (howdoyou--print-dom question)
