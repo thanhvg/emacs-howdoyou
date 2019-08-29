@@ -43,6 +43,15 @@ User must have ~org-mode~ 9.2 or later installed also.
 * Customization
 - ~howdoyou-use-curl:~          default is true if curl is available
 - ~howdoyou-number-of-answers:~ maximal number of answers to show, default is 3
+* Use with helm-google-suggest
+add this snippet to you config file
+#+begin_src elisp
+  (with-eval-after-load "helm-net"
+    (push (cons "How Do You"  (lambda (candidate) (howdoyou-query candidate)))
+          helm-google-suggest-actions))
+#+end_src
+Now =helm-google-suggest= will pass suggestion to howdoyou-query as default
+action.
 
 * Demo
 
