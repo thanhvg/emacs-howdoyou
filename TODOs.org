@@ -215,3 +215,58 @@ set shr-width to 0 or negative will disable line breaks in a sure way
 
 (defun shr-fill-lines (start end)
   (if (<= shr-internal-width 0)
+* reponse to review
+
+#+begin_quote
+These look like false positives. You can (and should) silence the compiler so
+that the warnings don't confuse users installing the package -- one way would be
+to rewrite the function body as:
+
+  (let* ((answer-nodes (dom-by-class (cdr result) "answercell"))
+         (question-dom (car (dom-by-id (cdr result) "^question$")))
+         (title (car (dom-by-class (cdr result) "question-hyperlink")))
+         (number-of-answers (min (length answer-nodes) howdoyou-number-of-answers))
+         (tags (howdoyou--get-so-tags (cdr result)))
+         (score-nodes (dom-by-class (cdr result) "js-vote-count"))
+         acc
+         scores)
+    (dotimes (i number-of-answers)
+      (setq acc (append acc (dom-by-class (nth i answer-nodes) "post-text"))))
+    (dotimes (i (1+ number-of-answers))
+      (setq scores (append scores `(,(dom-text (nth i score-nodes))))))
+    (list (car result)
+          (dom-text title)
+          (dom-by-class question-dom "post-text")
+          acc
+          scores
+          tags)))
+
+but the function feels more complicated than it needs to be.
+#+end_quote
+This won't work
+
+#+begin_quote
+You should (require 'subr-x) for if-let (rather than rely on transitive imports). Similarly you should (require 'url-http),
+#+end_quote
+This i don't understand
+
+#+begin_quote
+And some minor stuff:
+
+    howdoyou.el#L198: Consider unless ... instead of when (not ...)
+    howdoyou.el#L21: Prefer https over http (if possible)
+    
+    accross -> across
+    Roate -> ?
+    shawdow -> shadow
+    insead -> instead
+    Othewise -> Otherwise
+#+end_quote
+thanks, corrected
+
+    #+begin_quote
+    Try to be precise with your indentation, e.g. here, since it can obfuscate
+    the scope of your expressions. (Emacs should be able to indent elisp code
+    consistently.)
+    #+end_quote
+This is wrong.
