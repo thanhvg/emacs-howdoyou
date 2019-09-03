@@ -243,7 +243,6 @@ URL is a link string. Download the url and parse it to a DOM object"
   "Produce answer-list  from stackoverflow response.
 RESULT is a (url . dom).
 Return (url title question answers scores tags)"
-  ;; (setq thanh-so (cdr result))
   (let* ((answer-nodes (dom-by-class (cdr result) "answercell"))
          (question-dom (car (dom-by-id (cdr result) "^question$")))
          (title (car (dom-by-class (cdr result) "question-hyperlink")))
@@ -251,16 +250,14 @@ Return (url title question answers scores tags)"
                                 howdoyou-number-of-answers
                               (length answer-nodes)))
          (tags (howdoyou--get-so-tags (cdr result)))
-         (score-nodes (dom-by-class (cdr result) "js-vote-count"))
-         (acc nil)
-         (scores nil))
+         (score-nodes (dom-by-class (cdr result) "js-vote-count")))
     (list (car result)
           (dom-text title)
           (dom-by-class question-dom "post-text")
-          (dotimes (i number-of-answers acc)
-            (setq acc (append acc (dom-by-class (nth i answer-nodes) "post-text"))))
-          (dotimes (i (1+ number-of-answers) scores)
-            (setq scores (append scores `(,(dom-text (nth i score-nodes))))))
+          (mapcar (lambda (it) (dom-by-class it "post-text"))
+                  (seq-take answer-nodes number-of-answers))
+          (mapcar (lambda (it) (dom-text it))
+                  (seq-take score-nodes (1+ number-of-answers)))
           tags)))
 
 (defun howdoyou--print-answer (answer-list)
@@ -276,8 +273,6 @@ Return (url title question answers scores tags)"
          (tags (nth 5 answer-list))
          (first-run t) ;; flag for special treatment of first answer
          (lang (car tags))) ;; first tag is usually the language
-    ;; (setq thanh answers)
-    ;; (setq thanh-scores scores)
     (setq howdoyou--current-lang lang)
     (with-current-buffer howdoi-buffer
       (read-only-mode -1)
