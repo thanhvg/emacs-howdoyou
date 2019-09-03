@@ -18,13 +18,13 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+;; along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;; This package is inspired by python howdoi (https://github.com/gleitz/howdoi)
 ;; and howdoi Emacs package (https://github.com/lockie/emacs-howdoi and
 ;; https://github.com/atykhonov/emacs-howdoi). it searches your query all
-;; accross stackoverflow and its sisters' sites. They are: stackoverflow.com,
+;; across stackoverflow and its sisters' sites. They are: stackoverflow.com,
 ;; stackexchange.com, superuser.com, serverfault.com and askubunu.com. The
 ;; result is then showed in an `org-mode' buffer. For each result, the question
 ;; and three answers were showed, but they are collapsed by default except the
@@ -180,7 +180,7 @@ URL is a link string. Download the url and parse it to a DOM object"
 
 
 (defun howdoyou--get-user-agent ()
-  "Roate user agent from `howdoyou--user-agents'."
+  "Rotate user agent from `howdoyou--user-agents'."
   (let ((user-agent (nth howdoyou--current-user-agent howdoyou--user-agents)))
     (setq howdoyou--current-user-agent (if (>= howdoyou--current-user-agent
                                                (length howdoyou--user-agents))
@@ -305,8 +305,8 @@ Return (url title question answers scores tags)"
 
 (defun howdoyou--print-node (dom)
   "Print the DOM."
-  ;; shawdow some `shr' parameters
-  (let ((shr-bullet "- ") ;; insead of *
+  ;; shadow some `shr' parameters
+  (let ((shr-bullet "- ") ;; instead of *
         ;; no more line breaks
         (shr-width 0)
         ;; because we use fixed width anyway, save some computations
@@ -327,7 +327,7 @@ CLASS-NAME has nothing => empty string"
 (defun howdoyou--it-to-it (it)
   "Map node to node.
 IT is an element in the DOM tree. Map to different IT when it is
-a, img or pre. Othewise just copy"
+a, img or pre. Otherwise just copy"
   (cond
    ((and (listp it)
          (listp (cdr it))) ;; check for list but not cons
