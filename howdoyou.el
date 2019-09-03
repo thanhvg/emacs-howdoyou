@@ -195,7 +195,7 @@ URL is a link string. Download the url and parse it to a DOM object"
 (defun howdoyou--print-waiting-message (&optional msg)
   "Print MSG message and prepare window for howdoyou buffer."
   (let ((howdoi-buffer (howdoyou--get-buffer)))
-    (when (not (equal (window-buffer) howdoi-buffer))
+    (unless (equal (window-buffer) howdoi-buffer)
       ;; (switch-to-buffer-other-window howdoi-buffer))
       (display-buffer howdoi-buffer '(display-buffer-use-some-window (inhibit-same-window . t))))
     (with-current-buffer howdoi-buffer
