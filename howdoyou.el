@@ -371,9 +371,8 @@ Pop up *How Do You* buffer to show the answer."
                  (>= (+ n howdoyou--current-link-index) 0))
             (+ n howdoyou--current-link-index)
           howdoyou--current-link-index))
-  (promise-chain
-      (howdoyou--promise-dom (nth howdoyou--current-link-index
-                                  howdoyou--links))
+  (promise-chain (howdoyou--promise-dom (nth howdoyou--current-link-index
+                                             howdoyou--links))
     (then #'howdoyou--promise-so-answer)
     (then #'howdoyou--print-answer)
     (promise-catch (lambda (reason)
