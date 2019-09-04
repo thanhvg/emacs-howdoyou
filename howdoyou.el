@@ -57,6 +57,8 @@
 (require 'request)
 (require 'shr)
 (require 'org)
+(require 'subr-x)
+(require 'url)
 
 ;; public variables
 (defgroup howdoyou nil
