@@ -23,9 +23,11 @@ is important for users to read both questions and answers, so no "quick look"
 features such as code only view or code completion are provided.
 * Install
 MELPA
+
 [[https://melpa.org/#/howdoyou][file:https://melpa.org/packages/howdoyou-badge.svg]]
 
 Spacemacs layer:
+
 https://github.com/thanhvg/spacemacs-eos
 
 Manual: TBD
