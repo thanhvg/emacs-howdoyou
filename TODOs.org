@@ -270,3 +270,5 @@ thanks, corrected
     consistently.)
     #+end_quote
 This is wrong.
+
+* TODO render strikethrough

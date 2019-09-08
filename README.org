@@ -22,8 +22,8 @@ link and previous link. The author believes that when searching for solutions it
 is important for users to read both questions and answers, so no "quick look"
 features such as code only view or code completion are provided.
 * Install
-MELPA recipe pending
-https://github.com/melpa/melpa/pull/6394
+MELPA
+[[https://melpa.org/#/howdoyou][file:https://melpa.org/packages/howdoyou-badge.svg]]
 
 Spacemacs layer:
 https://github.com/thanhvg/spacemacs-eos
