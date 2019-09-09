@@ -63,7 +63,8 @@ action.
 [[file:screenshots/howdoyou2.gif]]
 
 * Contributors
-** https://github.com/dvzubarev
+** dvzubarev 
+https://github.com/dvzubarev
 * References
 - https://github.com/gleitz/howdoi
 - https://github.com/lockie/emacs-howdoi
