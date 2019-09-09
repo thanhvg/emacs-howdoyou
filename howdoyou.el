@@ -329,6 +329,18 @@ a, img or pre. Otherwise just copy"
    ((and (listp it)
          (listp (cdr it))) ;; check for list but not cons
     (cond
+     ((equal (car it) 'h2)
+      (concat "** " (dom-texts it)))
+     ((equal (car it) 'blockquote)
+      `(blockquote nil "#+begin_quote" ,(mapcar #'howdoyou--it-to-it it) "#+end_quote"))
+     ((equal (car it) 'code)
+      (concat "~" (dom-texts it) "~"))
+     ((equal (car it) 'strong)
+      (concat "*" (dom-texts it) "*"))
+     ((memq (car it) '(em i))
+      (concat "/" (dom-texts it) "/"))
+     ((memq (car it) '(s del))
+      (concat "+" (dom-texts it) "+"))
      ((and (equal (car it) 'a)
            (not (dom-by-tag it 'img))) ;; bail out if img
       (concat "[["
