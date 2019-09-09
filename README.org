@@ -65,6 +65,8 @@ action.
 * Contributors
 ** dvzubarev 
 https://github.com/dvzubarev
+** leothelocust
+https://github.com/leothelocust
 * References
 - https://github.com/gleitz/howdoi
 - https://github.com/lockie/emacs-howdoi
