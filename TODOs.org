@@ -271,4 +271,5 @@ thanks, corrected
     #+end_quote
 This is wrong.
 
-* TODO render strikethrough
+* DONE render strikethrough
+* DONE hide org makers
