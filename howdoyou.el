@@ -99,6 +99,7 @@
 (defvar howdoyou--current-user-agent 0
   "Index to be rotated.")
 
+;; idea from https://github.com/gleitz/howdoi
 (defvar howdoyou--user-agents
   '("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0"
     "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0"
