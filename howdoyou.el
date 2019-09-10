@@ -201,11 +201,11 @@ URL is a link string. Download the url and parse it to a DOM object"
 
 (defun howdoyou--print-waiting-message (&optional msg)
   "Print MSG message and prepare window for howdoyou buffer."
-  (let ((howdoi-buffer (howdoyou--get-buffer)))
-    (unless (equal (window-buffer) howdoi-buffer)
-      ;; (switch-to-buffer-other-window howdoi-buffer))
-      (display-buffer howdoi-buffer '(display-buffer-use-some-window (inhibit-same-window . t))))
-    (with-current-buffer howdoi-buffer
+  (let ((my-buffer (howdoyou--get-buffer)))
+    (unless (equal (window-buffer) my-buffer)
+      ;; (switch-to-buffer-other-window my-buffer))
+      (display-buffer my-buffer '(display-buffer-use-some-window (inhibit-same-window . t))))
+    (with-current-buffer my-buffer
       (read-only-mode -1)
       (erase-buffer)
       (insert (if msg
@@ -269,7 +269,7 @@ Return (url title question answers scores tags)"
 
 (defun howdoyou--print-answer (answer-list)
   "Print ANSWER-LIST to *How Do You* buffer."
-  (let* ((howdoi-buffer (howdoyou--get-buffer))
+  (let* ((my-buffer (howdoyou--get-buffer))
          (url (car answer-list))
          (title (nth 1 answer-list))
          (question (nth 2 answer-list))
@@ -282,7 +282,7 @@ Return (url title question answers scores tags)"
          (org-hide-emphasis-markers t) ;; set org-mode to hide makers
          (lang (car tags))) ;; first tag is usually the language
     (setq howdoyou--current-lang lang)
-    (with-current-buffer howdoi-buffer
+    (with-current-buffer my-buffer
       (read-only-mode -1)
       (erase-buffer)
       (insert "#+STARTUP: overview\n#+TITLE: " title "\n")
