@@ -273,3 +273,4 @@ This is wrong.
 
 * DONE render strikethrough
 * DONE hide org makers
+* option to select answer buffer

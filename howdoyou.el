@@ -41,8 +41,8 @@
 
 ;;; Commands
 ;; howdoyou-query:                 prompt for query and do search
-;; howdoyou-next-query:            go to next link
-;; howdoyou-previous-query:        go to previous link
+;; howdoyou-next-link:             go to next link
+;; howdoyou-previous-link:         go to previous link
 ;; howdoyou-go-back-to-first-link: go back to first link
 ;; howdoyou-reload-link:           reload link
 
@@ -77,6 +77,11 @@
 
 (defcustom howdoyou-number-of-answers 3
   "Number of maximal answers to show."
+  :type 'number
+  :group 'howdoyou)
+
+(defcustom howdoyou-switch-to-answer-buffer nil
+  "If non-nil answer-buffer will be selected."
   :type 'number
   :group 'howdoyou)
 
