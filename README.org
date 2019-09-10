@@ -43,8 +43,9 @@ User must have ~org-mode~ 9.2 or later installed also.
 - ~howdoyou-go-back-to-first-link:~ go back to first link
 - ~howdoyou-reload-link:~           reload link
 * Customization
-- ~howdoyou-use-curl:~          default is true if curl is available
+- ~howdoyou-use-curl:~ default is true if ~curl~ is available
 - ~howdoyou-number-of-answers:~ maximal number of answers to show, default is 3
+- ~howdoyou-switch-to-answer-buffer~: switch to answer buffer if non nil, default is nil
 * Use with helm-google-suggest
 add this snippet to you config file
 #+begin_src elisp

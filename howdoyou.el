@@ -40,15 +40,16 @@
 ;; user must have `org-mode' 9.2 or later installed also.
 
 ;;; Commands
-;; howdoyou-query:                 prompt for query and do search
-;; howdoyou-next-link:             go to next link
-;; howdoyou-previous-link:         go to previous link
-;; howdoyou-go-back-to-first-link: go back to first link
-;; howdoyou-reload-link:           reload link
+;; howdoyou-query:                   prompt for query and do search
+;; howdoyou-next-link:               go to next link
+;; howdoyou-previous-link:           go to previous link
+;; howdoyou-go-back-to-first-link:   go back to first link
+;; howdoyou-reload-link:             reload link
 
 ;;; Customization
-;; howdoyou-use-curl:              default is true if curl is available
-;; howdoyou-number-of-answers:     maximal number of answers to show, default is 3
+;; howdoyou-use-curl:                default is true if curl is available
+;; howdoyou-number-of-answers:       maximal number of answers to show, default is 3
+;; howdoyou-switch-to-answer-buffer: switch to answer buffer if non nil, default is nil
 
 ;;; Code:
 (require 'promise)
@@ -82,7 +83,7 @@
 
 (defcustom howdoyou-switch-to-answer-buffer nil
   "If non-nil answer-buffer will be selected."
-  :type 'number
+  :type 'boolean
   :group 'howdoyou)
 
 ;; private variables
@@ -204,7 +205,14 @@ URL is a link string. Download the url and parse it to a DOM object"
   (let ((my-buffer (howdoyou--get-buffer)))
     (unless (equal (window-buffer) my-buffer)
       ;; (switch-to-buffer-other-window my-buffer))
-      (display-buffer my-buffer '(display-buffer-use-some-window (inhibit-same-window . t))))
+      (if howdoyou-switch-to-answer-buffer
+          (select-window
+           (display-buffer my-buffer
+                           '(display-buffer-use-some-window (inhibit-same-window
+                                                             . t))))
+        (display-buffer my-buffer
+                        '(display-buffer-use-some-window (inhibit-same-window
+                                                          . t)))))
     (with-current-buffer my-buffer
       (read-only-mode -1)
       (erase-buffer)
