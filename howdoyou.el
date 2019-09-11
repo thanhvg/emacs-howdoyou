@@ -358,11 +358,7 @@ a, img or pre. Otherwise just copy"
       (concat "+" (dom-texts it) "+"))
      ((and (equal (car it) 'a)
            (not (dom-by-tag it 'img))) ;; bail out if img
-      (concat "[["
-              (dom-attr it 'href)
-              "]["
-              (dom-texts it)
-              "]]"))
+      (org-make-link-string (dom-attr it 'href) (dom-texts it)))
      ;; ((and (equal (dom-tag it) 'div)
      ;;       (equal (dom-attr it 'class) "snippet"))
      ;;  (mapcar #'howdoyou--it-to-it (dom-by-tag it 'pre)))
