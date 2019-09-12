@@ -60,6 +60,7 @@
 (require 'org)
 (require 'subr-x)
 (require 'url)
+(require 'font-lock)
 
 ;; public variables
 (defgroup howdoyou nil
@@ -313,7 +314,9 @@ Return (url title question answers scores tags)"
       (if (equal major-mode 'org-mode)
           (org-set-startup-visibility)
         (org-mode)
-        (setq-local org-hide-emphasis-markers t))
+        (setq-local org-hide-emphasis-markers t)
+        ;; need this on spacemacs if org-mode never loaded anywhere
+        (font-lock-flush))
       (visual-line-mode)
       (goto-char (point-min)))))
 
