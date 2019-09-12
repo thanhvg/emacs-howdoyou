@@ -288,7 +288,6 @@ Return (url title question answers scores tags)"
          (answer-scores (cdr scores))
          (tags (nth 5 answer-list))
          (first-run t) ;; flag for special treatment of first answer
-         (org-hide-emphasis-markers t) ;; set org-mode to hide makers
          (lang (car tags))) ;; first tag is usually the language
     (setq howdoyou--current-lang lang)
     (with-current-buffer my-buffer
@@ -311,7 +310,10 @@ Return (url title question answers scores tags)"
                  answers
                  answer-scores)
       (delete-trailing-whitespace)
-      (org-mode)
+      (if (equal major-mode 'org-mode)
+          (org-set-startup-visibility)
+        (org-mode)
+        (setq-local org-hide-emphasis-markers t))
       (visual-line-mode)
       (goto-char (point-min)))))
 
