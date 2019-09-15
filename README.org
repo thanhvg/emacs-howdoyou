@@ -56,7 +56,7 @@ add this snippet to you config file
 Now =helm-google-suggest= will pass suggestion to howdoyou-query as default
 action.
 
-* Demo
+* Demoj
 
 [[file:screenshots/howdoyou.gif]]
 
@@ -68,6 +68,8 @@ action.
 https://github.com/dvzubarev
 ** leothelocust
 https://github.com/leothelocust
+** dickmao
+https://github.com/dickmao
 * References
 - https://github.com/gleitz/howdoi
 - https://github.com/lockie/emacs-howdoi
