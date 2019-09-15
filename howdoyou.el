@@ -227,11 +227,14 @@ URL is a link string. Download the url and parse it to a DOM object"
                         '(display-buffer-use-some-window (inhibit-same-window
                                                           . t)))))
     (with-current-buffer my-buffer
-      (read-only-mode -1)
-      (erase-buffer)
-      (insert (if msg
-                  (apply #'format msg args)
-                "Searching...")))))
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (insert (if msg
+                    (apply #'format msg args)
+                  "Searching..."))
+        (read-only-mode 1)
+        (unless howdoyou-mode
+          (howdoyou-mode 1))))))
 
 (defun howdoyou-promise-answer (query)
   "Process QUERY and print answers to *How Do You* buffer."
@@ -255,11 +258,11 @@ URL is a link string. Download the url and parse it to a DOM object"
               ;; (setq thanh links)
               (setq howdoyou--links links)
               (setq howdoyou--current-link-index 0)
-              (howdoyou--promise-dom (car links))))
-      (then #'howdoyou--promise-so-answer)
-      (then #'howdoyou--print-answer)
-      (promise-catch (lambda (reason)
-                       (message "catch error in promise answer: %s" reason))))))
+              (if howdoyou--links
+                  (howdoyou-reload-link)
+                (message "howdoyou-promise-answer: No results \"%s\"" query))))
+      (catch (lambda (reason)
+               (message "catch error in promise answer: %s" reason))))))
 
 (defun howdoyou--get-so-tags (dom)
   "Extract list of tags from stackoverflow DOM."
@@ -329,7 +332,8 @@ Return (url title question answers scores tags)"
         ;; need this on spacemacs if org-mode never loaded anywhere
         (font-lock-flush))
       (visual-line-mode)
-      (howdoyou-mode 1)
+      (unless howdoyou-mode
+        (howdoyou-mode 1))
       (goto-char (point-min)))))
 
 (defun howdoyou--print-node (dom)
@@ -398,21 +402,21 @@ a, img or pre. Otherwise just copy"
   "Prompt for QUERY and search for answer.
 Pop up *How Do You* buffer to show the answer."
   (interactive "sQuery: ")
+  (message "_") ;; prevent suggest-key-bindings from usurping minibuffer
   (howdoyou-promise-answer query))
 
 (defun howdoyou-n-link (n)
   "Jump N steps in `howdoyou--links' and request and print the answer."
   (let ((cand (+ n howdoyou--current-link-index))
-        (total (length howdoyou--links))
-        notification)
+        (total (length howdoyou--links)))
+    (when (zerop total)
+      (error "howdoyou-n-link: No current links"))
     (cond ((< cand 0)
            (setq cand 0)
-           (setq notification (format "howdoyou-n-link: at first link %s of %s"
-                                      (1+ cand) total)))
+           (message "howdoyou-n-link: at first link %s of %s" (1+ cand) total))
           ((>= cand total)
            (setq cand (1- total))
-           (setq notification (format "howdoyou-n-link: at final link %s of %s"
-                                      (1+ cand) total))))
+           (message "howdoyou-n-link: at final link %s of %s" (1+ cand) total)))
     (when (or (zerop n) (/= cand howdoyou--current-link-index))
       (let ((link (nth cand howdoyou--links)))
         (howdoyou--print-waiting-message "Loading %s of %s..." (1+ cand) total)
@@ -421,20 +425,22 @@ Pop up *How Do You* buffer to show the answer."
           (then #'howdoyou--print-answer)
           (then (lambda (_result)
                   (setq howdoyou--current-link-index cand)))
-          (promise-catch (lambda (reason)
-                           (unless (zerop n)
-                             (howdoyou-reload-link))
-                           (message "catch error in n-link: %s %s" reason link))))))
-    (when notification
-      (message notification))))
+          (catch (lambda (reason)
+                   (message "catch error in n-link: %s %s" reason link)
+                   (unless (zerop n)
+                     (let ((one-past
+                            (min (1- total)
+                                 (max 0 (funcall (if (< n 0) #'1- #'1+) n)))))
+                       (when (/= one-past cand)
+                         (howdoyou-n-link one-past)))))))))))
 
 (defun howdoyou-read-so-link (link)
   "Read stackoverflow LINK in buffer."
   (promise-chain (howdoyou--promise-dom link)
     (then #'howdoyou--promise-so-answer)
     (then #'howdoyou--print-answer)
-    (promise-catch (lambda (reason)
-                     (message "catch error in so-link: %s" reason)))))
+    (catch (lambda (reason)
+             (message "catch error in so-link: %s" reason)))))
 
 ;;;###autoload
 (defun howdoyou-next-link ()
