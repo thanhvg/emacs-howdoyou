@@ -231,10 +231,10 @@ URL is a link string. Download the url and parse it to a DOM object"
         (erase-buffer)
         (insert (if msg
                     (apply #'format msg args)
-                  "Searching..."))
-        (read-only-mode 1)
-        (unless howdoyou-mode
-          (howdoyou-mode 1))))))
+                  "Searching...")))
+      (read-only-mode 1)
+      (unless howdoyou-mode
+        (howdoyou-mode 1)))))
 
 (defun howdoyou-promise-answer (query)
   "Process QUERY and print answers to *How Do You* buffer."
