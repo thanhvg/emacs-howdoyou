@@ -100,6 +100,17 @@
 (defvar howdoyou--current-user-agent 0
   "Index to be rotated.")
 
+(define-minor-mode howdoyou-mode
+  "Minor mode for howdoyou.
+
+\\{howdoyou-mode-map}
+"
+  :lighter " HDY"
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "C-M-<left>") #'howdoyou-previous-link)
+            (define-key map (kbd "C-M-<right>") #'howdoyou-next-link)
+            map))
+
 ;; idea from https://github.com/gleitz/howdoi
 (defvar howdoyou--user-agents
   '("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0"
@@ -318,6 +329,7 @@ Return (url title question answers scores tags)"
         ;; need this on spacemacs if org-mode never loaded anywhere
         (font-lock-flush))
       (visual-line-mode)
+      (howdoyou-mode 1)
       (goto-char (point-min)))))
 
 (defun howdoyou--print-node (dom)
