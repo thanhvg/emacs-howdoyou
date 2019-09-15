@@ -202,7 +202,7 @@ URL is a link string. Download the url and parse it to a DOM object"
   "Get *How Do You* buffer."
   (get-buffer-create "*How Do You*"))
 
-(defun howdoyou--print-waiting-message (&optional msg)
+(defun howdoyou--print-waiting-message (&optional msg &rest args)
   "Print MSG message and prepare window for howdoyou buffer."
   (let ((my-buffer (howdoyou--get-buffer)))
     (unless (equal (window-buffer) my-buffer)
@@ -219,7 +219,7 @@ URL is a link string. Download the url and parse it to a DOM object"
       (read-only-mode -1)
       (erase-buffer)
       (insert (if msg
-                  msg
+                  (apply #'format msg args)
                 "Searching...")))))
 
 (defun howdoyou-promise-answer (query)
@@ -390,18 +390,31 @@ Pop up *How Do You* buffer to show the answer."
 
 (defun howdoyou-n-link (n)
   "Jump N steps in `howdoyou--links' and request and print the answer."
-  (howdoyou--print-waiting-message "Loading...")
-  (setq howdoyou--current-link-index
-        (if (and (<= (+ n howdoyou--current-link-index) (length howdoyou--links))
-                 (>= (+ n howdoyou--current-link-index) 0))
-            (+ n howdoyou--current-link-index)
-          howdoyou--current-link-index))
-  (promise-chain (howdoyou--promise-dom (nth howdoyou--current-link-index
-                                             howdoyou--links))
-    (then #'howdoyou--promise-so-answer)
-    (then #'howdoyou--print-answer)
-    (promise-catch (lambda (reason)
-                     (message "catch error in n-link: %s" reason)))))
+  (let ((cand (+ n howdoyou--current-link-index))
+        (total (length howdoyou--links))
+        notification)
+    (cond ((< cand 0)
+           (setq cand 0)
+           (setq notification (format "howdoyou-n-link: at first link %s of %s"
+                                      (1+ cand) total)))
+          ((>= cand total)
+           (setq cand (1- total))
+           (setq notification (format "howdoyou-n-link: at final link %s of %s"
+                                      (1+ cand) total))))
+    (when (or (zerop n) (/= cand howdoyou--current-link-index))
+      (let ((link (nth cand howdoyou--links)))
+        (howdoyou--print-waiting-message "Loading %s of %s..." (1+ cand) total)
+        (promise-chain (howdoyou--promise-dom link)
+          (then #'howdoyou--promise-so-answer)
+          (then #'howdoyou--print-answer)
+          (then (lambda (_result)
+                  (setq howdoyou--current-link-index cand)))
+          (promise-catch (lambda (reason)
+                           (unless (zerop n)
+                             (howdoyou-reload-link))
+                           (message "catch error in n-link: %s %s" reason link))))))
+    (when notification
+      (message notification))))
 
 (defun howdoyou-read-so-link (link)
   "Read stackoverflow LINK in buffer."
