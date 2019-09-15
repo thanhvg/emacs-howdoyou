@@ -59,6 +59,9 @@ because of this it can figure out you're not using a browser and ban you later
 
 * DONE use curl 
 directly use of curl is hard, use request which is an abtraction over curl
+curl -A "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" https://www.google.com
+curl -A "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:59.0) Gecko/20100101 Firefox/59.0" https://www.google.com/search?q=howdoy%20you%20re%20site%3Astackoverflow.com%20OR%20site%3Astackexchange.com%20OR%20site%3Asuperuser.com%20OR%20site%3Aserverfault.com%20OR%20site%3Aaskubunu.com
+
 * DONE bug parsing
 query: elisp check if buffers are the same 
 links https://stackoverflow.com/questions/586735/how-can-i-check-if-a-current-buffer-exists-in-emacs
