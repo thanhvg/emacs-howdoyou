@@ -168,7 +168,8 @@ DOM is a dom object of the google search, returns a list of links"
      ;; shadow reject-curl-options to have user agent
      (let ((request-curl-options `(,(format "-A %s" (howdoyou--get-user-agent)))))
        (request url
-                :parser (lambda () (libxml-parse-html-region (point-min) (point-max)))
+                :parser (lambda () (progn (decode-coding-region (point-min) (point-max) 'utf-8)
+                                     (libxml-parse-html-region (point-min) (point-max))))
                 :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
                                       (funcall reject  error-thrown)))
                 :success (cl-function (lambda (&key data &allow-other-keys)
