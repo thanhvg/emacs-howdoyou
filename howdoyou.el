@@ -244,7 +244,7 @@ URL is a link string. Download the url and parse it to a DOM object"
                       (url-hexify-string "site:stackexchange.com OR ")
                       (url-hexify-string "site:superuser.com OR ")
                       (url-hexify-string "site:serverfault.com OR ")
-                      (url-hexify-string "site:askubunu.com")
+                      (url-hexify-string "site:askubuntu.com")
                       "&hl=en")))
     (promise-chain (howdoyou--promise-dom (concat url args))
       (then (lambda (result)
