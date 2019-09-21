@@ -252,15 +252,13 @@ URL is a link string. Download the url and parse it to a DOM object"
                       "&hl=en")))
     (promise-chain (howdoyou--promise-dom (concat url args))
       (then (lambda (result)
-              ;; (setq thanh-dom (cdr result))
               (howdoyou--extract-links-from-google (cdr result))))
       (then (lambda (links)
-              ;; (message "%s" links)
-              ;; (setq thanh links)
               (setq howdoyou--links links)
               (setq howdoyou--current-link-index 0)
               (if howdoyou--links
-                  (howdoyou-reload-link)
+                  (howdoyou-n-link 0)
+                ;; TODO print this error to howdoyou buffer
                 (message "howdoyou-promise-answer: No results \"%s\"" query))))
       (catch (lambda (reason)
                (message "catch error in promise answer: %s" reason))))))
