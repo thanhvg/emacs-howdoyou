@@ -56,7 +56,7 @@ add this snippet to you config file
 Now =helm-google-suggest= will pass suggestion to howdoyou-query as default
 action.
 
-* Demoj
+* Demo
 
 [[file:screenshots/howdoyou.gif]]
 
