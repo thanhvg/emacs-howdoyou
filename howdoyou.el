@@ -82,6 +82,12 @@
   :type 'number
   :group 'howdoyou)
 
+
+(defcustom howdoyou-max-history 20
+  "Number of maximal query history."
+  :type 'number
+  :group 'howdoyou)
+
 (defcustom howdoyou-switch-to-answer-buffer nil
   "If non-nil answer-buffer will be selected."
   :type 'boolean
@@ -93,6 +99,9 @@
 
 (defvar howdoyou--links nil
   "List of so links from google search.")
+
+(defvar howdoyou--query-history '()
+  "List of query history")
 
 (defvar howdoyou--current-lang nil
   "Guested language.")
@@ -199,7 +208,6 @@ URL is a link string. Download the url and parse it to a DOM object"
 URL is a link string. Download the url and parse it to a DOM object"
   (if howdoyou-use-curl (howdoyou--curl-promise-dom url)
     (howdoyou--url-promise-dom url)))
-
 
 (defun howdoyou--get-user-agent ()
   "Rotate user agent from `howdoyou--user-agents'."
@@ -324,6 +332,7 @@ Return (url title question answers scores tags)"
                  answers
                  answer-scores)
       (delete-trailing-whitespace)
+      (howdoyou--print-history)
       (if (equal major-mode 'org-mode)
           (org-set-startup-visibility)
         (org-mode)
@@ -396,12 +405,27 @@ a, img or pre. Otherwise just copy"
   "Map new dom from DOM and print it."
   (howdoyou--print-node (mapcar #'howdoyou--it-to-it dom)))
 
+(defun howdoyou--update-history (query)
+  "Add QUERY to `howdoyou--query-history'."
+  (setq howdoyou--query-history
+        (seq-take (add-to-list 'howdoyou--query-history query)
+                  howdoyou-max-history)))
+
+(defun howdoyou--print-history ()
+  "Print `howdoyou--query-history'."
+  (insert "* History\n")
+  (dolist (query howdoyou--query-history)
+    (insert (format "[[elisp:(howdoyou-promise-answer \"%s\")][%s]]\n"
+                    query
+                    query))))
+
 ;;;###autoload
 (defun howdoyou-query (query)
   "Prompt for QUERY and search for answer.
 Pop up *How Do You* buffer to show the answer."
   (interactive "sQuery: ")
   (message "_") ;; prevent suggest-key-bindings from usurping minibuffer
+  (howdoyou--update-history query)
   (howdoyou-promise-answer query))
 
 (defun howdoyou-n-link (n)
@@ -440,6 +464,10 @@ Pop up *How Do You* buffer to show the answer."
     (then #'howdoyou--print-answer)
     (catch (lambda (reason)
              (message "catch error in so-link: %s" reason)))))
+
+(defun howdoyou-clear-history ()
+  "Clear `howdoyou--query-history'."
+  (setq howdoyou--query-history '()))
 
 ;;;###autoload
 (defun howdoyou-next-link ()
