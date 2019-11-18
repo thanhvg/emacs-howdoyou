@@ -333,13 +333,22 @@ Return (url title question answers scores tags)"
                  answer-scores)
       (delete-trailing-whitespace)
       (howdoyou--print-history)
+      ;; code of `org-fill-paragraph'
+      (let ((start (point-min)))
+        (unwind-protect
+            (progn
+              (goto-char (point-max))
+              (while (> (point) start)
+                (org-backward-paragraph)
+                (org-fill-element nil)))))
+
       (if (equal major-mode 'org-mode)
           (org-set-startup-visibility)
         (org-mode)
         (setq-local org-hide-emphasis-markers t)
         ;; need this on spacemacs if org-mode never loaded anywhere
         (font-lock-flush))
-      (visual-line-mode)
+      ;; (visual-line-mode)
       (unless howdoyou-mode
         (howdoyou-mode 1))
       (goto-char (point-min)))))
