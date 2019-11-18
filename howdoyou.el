@@ -413,7 +413,7 @@ a, img or pre. Otherwise just copy"
 
 (defun howdoyou--print-history ()
   "Print `howdoyou--query-history'."
-  (insert "* History\n")
+  (insert "\n* History\n")
   (dolist (query howdoyou--query-history)
     (insert (format "[[elisp:(howdoyou-promise-answer \"%s\")][%s]]\n"
                     query
