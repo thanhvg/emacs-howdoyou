@@ -333,6 +333,8 @@ Return (url title question answers scores tags)"
                  answer-scores)
       (delete-trailing-whitespace)
       (howdoyou--print-history)
+      (org-restart-font-lock)
+      (org-show-all)
       ;; code of `org-fill-paragraph'
       (let ((start (point-min)))
         (unwind-protect
@@ -340,8 +342,9 @@ Return (url title question answers scores tags)"
               (goto-char (point-max))
               (while (> (point) start)
                 (org-backward-paragraph)
-                (org-fill-element nil)))))
-
+                ;; need to skip image
+                (unless (get-text-property (point) 'display)
+                  (org-fill-element nil))))))
       (if (equal major-mode 'org-mode)
           (org-set-startup-visibility)
         (org-mode)
