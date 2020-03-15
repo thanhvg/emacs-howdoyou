@@ -30,8 +30,6 @@ Spacemacs layer:
 
 https://github.com/thanhvg/spacemacs-eos
 
-Manual: TBD
-
 * Dependencies
 ~promise~ and ~request~ are required.
 User must have ~org-mode~ 9.2 or later installed also.
@@ -56,6 +54,9 @@ add this snippet to you config file
 Now =helm-google-suggest= will pass suggestion to howdoyou-query as default
 action.
 
+Note that =spacemas-eos= has its own faster google suggetion engine provided by
+[[https://github.com/thanhvg/emacs-google-suggest][google-suggest]] package.
+
 * Use with counsel-web-suggest
 add this function definition to your config file
 #+begin_src elisp
@@ -79,12 +80,20 @@ it will pass =counsel-web-suggest= suggestions to howdoyou-query.
 [[file:screenshots/howdoyou2.gif]]
 
 * Contributors
+in no particular order:
 ** dvzubarev 
 https://github.com/dvzubarev
 ** leothelocust
 https://github.com/leothelocust
 ** dickmao
 https://github.com/dickmao
+** Alois Janíček
+https://github.com/AloisJanicek
+
+* Shoutout
+- https://github.com/chuntaro/emacs-promise
+- https://github.com/tkf/emacs-request
+
 * References
 - https://github.com/gleitz/howdoi
 - https://github.com/lockie/emacs-howdoi
