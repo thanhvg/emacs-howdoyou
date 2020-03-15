@@ -56,6 +56,21 @@ add this snippet to you config file
 Now =helm-google-suggest= will pass suggestion to howdoyou-query as default
 action.
 
+* Use with counsel-web-suggest
+add this function definition to your config file
+#+begin_src elisp
+  (defun my/howdoyou-with-suggestions ()
+  "Call `howdoyou-query' with suggestions from `counsel-web-suggest'."
+  (interactive)
+  (counsel-web-suggest nil
+                       "How Do You: "
+                       #'counsel-web-suggest--google
+                       (lambda (x)
+                         (howdoyou-query x))))
+#+end_src
+Now when calling =my/howdoyou-with-suggestion= (either from ~M-x~ or by [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Changing-Key-Bindings.html][key binding]] of your choice)
+it will pass =counsel-web-suggest= suggestions to howdoyou-query.
+
 * Demo
 
 [[file:screenshots/howdoyou.gif]]
