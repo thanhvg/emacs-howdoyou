@@ -58,6 +58,8 @@ Note that =spacemas-eos= has its own faster google suggetion engine provided by
 [[https://github.com/thanhvg/emacs-google-suggest][google-suggest]] package.
 
 * Use with counsel-web-suggest
+Requires installed and configured 3rd party package [[https://github.com/mnewt/counsel-web][counsel-web]].
+
 add this function definition to your config file
 #+begin_src elisp
   (defun my/howdoyou-with-suggestions ()
