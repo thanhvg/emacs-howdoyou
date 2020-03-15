@@ -57,6 +57,8 @@ Now =helm-google-suggest= will pass suggestion to howdoyou-query as default
 action.
 
 * Use with counsel-web-suggest
+Requires installed and configured [[https://github.com/mnewt/counsel-web][counsel-web-suggest]]
+
 add this function definition to your config file
 #+begin_src elisp
   (defun my/howdoyou-with-suggestions ()
