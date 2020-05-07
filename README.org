@@ -12,7 +12,7 @@ your query all across stackoverflow and it's sisters' sites. They are:
 - stackexchange.com 
 - superuser.com
 - serverfault.com
-- askubunu.com
+- askubuntu.com
 
 The result is then showed in an ~org-mode~ buffer. For each result, question and
 three answers were showed, but they are collapsed by default except the first
