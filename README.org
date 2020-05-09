@@ -81,16 +81,8 @@ it will pass =counsel-web-suggest= suggestions to howdoyou-query.
 
 [[file:screenshots/howdoyou2.gif]]
 
-* Contributors
-in no particular order:
-** dvzubarev 
-https://github.com/dvzubarev
-** leothelocust
-https://github.com/leothelocust
-** dickmao
-https://github.com/dickmao
-** Alois Janíček
-https://github.com/AloisJanicek
+* Contributors (in no particular order):
+[[https://github.com/dvzubarev][dvzubarev]], [[https://github.com/leothelocust][leothelocust]], [[https://github.com/dickmao][dickmao]], [[https://github.com/AloisJanicek][Alois Janíček]], [[https://github.com/EvanMeek][Evan]] 
 
 * Shoutout
 - https://github.com/chuntaro/emacs-promise
