@@ -177,12 +177,12 @@ DOM is a dom object of the google search, returns a list of links"
      ;; shadow reject-curl-options to have user agent
      (let ((request-curl-options `(,(format "-A %s" (howdoyou--get-user-agent)))))
        (request url
-                :parser (lambda () (progn (decode-coding-region (point-min) (point-max) 'utf-8)
-                                          (libxml-parse-html-region (point-min) (point-max))))
-                :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                                      (funcall reject  error-thrown)))
-                :success (cl-function (lambda (&key data &allow-other-keys)
-                                        (funcall resolve (cons url data)))))))))
+         :parser (lambda () (progn (decode-coding-region (point-min) (point-max) 'utf-8)
+                                   (libxml-parse-html-region (point-min) (point-max))))
+         :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+                               (funcall reject  error-thrown)))
+         :success (cl-function (lambda (&key data &allow-other-keys)
+                                 (funcall resolve (cons url data)))))))))
 
 (defun howdoyou--url-promise-dom (url)
   "Promise a cons (URL . dom).
@@ -277,6 +277,14 @@ URL is a link string. Download the url and parse it to a DOM object"
                                 "^post-tag$")))
     (mapcar #'dom-text tag-doms)))
 
+
+(defun hodoyou--get-answer-and-time-from-nodes (nodes)
+  "From answer NODES produce list of (answer. time)."
+  (cons (dom-by-class nodes "post-text")
+        (mapconcat (lambda (it) (substring (dom-attr it 'title) 0 10))
+                   (dom-by-class nodes "relativetime")
+                   " / ")))
+
 (defun howdoyou--promise-so-answer (result)
   "Produce answer-list  from stackoverflow response.
 RESULT is a (url . dom).
@@ -289,10 +297,11 @@ Return (url title question answers scores tags)"
                               (length answer-nodes)))
          (tags (howdoyou--get-so-tags (cdr result)))
          (score-nodes (dom-by-class (cdr result) "js-vote-count")))
+    (setq thanh answer-nodes)
     (list (car result)
           (dom-text title)
           (dom-by-class question-dom "post-text")
-          (mapcar (lambda (it) (dom-by-class it "post-text"))
+          (mapcar #'hodoyou--get-answer-and-time-from-nodes
                   (seq-take answer-nodes number-of-answers))
           (mapcar (lambda (it) (dom-text it))
                   (seq-take score-nodes (1+ number-of-answers)))
@@ -304,7 +313,7 @@ Return (url title question answers scores tags)"
          (url (car answer-list))
          (title (nth 1 answer-list))
          (question (nth 2 answer-list))
-         (answers (nth 3 answer-list))
+         (answers (nth 3 answer-list)) ;; list of (answer . time)
          (scores (nth 4 answer-list))
          (question-score (car scores))
          (answer-scores (cdr scores))
@@ -324,11 +333,11 @@ Return (url title question answers scores tags)"
         (insert tag)
         (insert " "))
       (cl-mapcar (lambda (a s)
-                   (insert (format "\n* Answer (%s)" s))
+                   (insert (format "\n* Answer (%s) (%s)" s (cdr a)))
                    (when first-run
                      (insert "\n:PROPERTIES:\n:VISIBILITY: all\n:END:\n")
                      (setq first-run nil))
-                   (howdoyou--print-dom a))
+                   (howdoyou--print-dom (car a)))
                  answers
                  answer-scores)
       (delete-trailing-whitespace)

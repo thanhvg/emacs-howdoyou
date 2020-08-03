@@ -286,7 +286,9 @@ it runs spacemacs/prettify-org-buffer at core/core-funcs.el
 
 current dead simple: use major-mode == 'org-mode as flag
 https://stackoverflow.com/questions/8008211/buffer-local-function-in-elisp
-* TODO show time and username
+* TODO show username
+* DONE show time
+CLOSED: [2020-08-03 Mon 12:03]
 * DONE history
 CLOSED: [2019-11-14 Thu 00:10]
 * TODO buttons to delete history item and delete all
