@@ -17,7 +17,7 @@ your query all across stackoverflow and it's sisters' sites. They are:
 The result is then showed in an ~org-mode~ buffer. For each result, question and
 three answers were showed, but they are collapsed by default except the first
 answer. As this package uses Google to get the links, for each query there will
-be a dozen of links, the fist link will be used, then use can go to next
+be a dozen of links, the fist link will be used, then users can go to next
 link and previous link. The author believes that when searching for solutions it
 is important for users to read both questions and answers, so no "quick look"
 features such as code only view or code completion are provided.
