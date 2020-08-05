@@ -199,7 +199,6 @@ URL is a link string. Download the url and parse it to a DOM object"
                              (with-current-buffer (current-buffer)
                                (if (not (url-http-parse-headers))
                                    (funcall reject (buffer-string))
-                                 ;; (setq thanh-web (buffer-string))
                                  (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))
                            (error (funcall reject ex))))))))))
 
@@ -297,7 +296,6 @@ Return (url title question answers scores tags)"
                               (length answer-nodes)))
          (tags (howdoyou--get-so-tags (cdr result)))
          (score-nodes (dom-by-class (cdr result) "js-vote-count")))
-    (setq thanh answer-nodes)
     (list (car result)
           (dom-text title)
           (dom-by-class question-dom "post-text")
@@ -396,7 +394,7 @@ a, img or pre. Otherwise just copy"
       (concat "+" (dom-texts it) "+"))
      ((and (equal (car it) 'a)
            (not (dom-by-tag it 'img))) ;; bail out if img
-      (org-make-link-string (dom-attr it 'href) (dom-texts it)))
+      (org-link-make-string (dom-attr it 'href) (dom-texts it)))
      ;; ((and (equal (dom-tag it) 'div)
      ;;       (equal (dom-attr it 'class) "snippet"))
      ;;  (mapcar #'howdoyou--it-to-it (dom-by-tag it 'pre)))
