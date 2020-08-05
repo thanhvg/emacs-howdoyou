@@ -277,7 +277,7 @@ URL is a link string. Download the url and parse it to a DOM object"
     (mapcar #'dom-text tag-doms)))
 
 
-(defun hodoyou--get-answer-and-time-from-nodes (nodes)
+(defun howdoyou--get-answer-and-time-from-nodes (nodes)
   "From answer NODES produce list of (answer. time)."
   (cons (dom-by-class nodes "post-text")
         (mapconcat (lambda (it) (substring (dom-attr it 'title) 0 10))
@@ -299,7 +299,7 @@ Return (url title question answers scores tags)"
     (list (car result)
           (dom-text title)
           (dom-by-class question-dom "post-text")
-          (mapcar #'hodoyou--get-answer-and-time-from-nodes
+          (mapcar #'howdoyou--get-answer-and-time-from-nodes
                   (seq-take answer-nodes number-of-answers))
           (mapcar (lambda (it) (dom-text it))
                   (seq-take score-nodes (1+ number-of-answers)))
