@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/howdoyou/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.1
+;; Version: 0.2
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -49,6 +49,11 @@
 ;; howdoyou-use-curl:                default is true if curl is available
 ;; howdoyou-number-of-answers:       maximal number of answers to show, default is 3
 ;; howdoyou-switch-to-answer-buffer: switch to answer buffer if non nil, default is nil
+
+;;; Changelog
+;; 2020-08-27:
+;; - bump version
+;; - adapt to recent change by SO: css class from "post-text" to "s-prose"
 
 ;;; Code:
 (require 'promise)
@@ -278,7 +283,7 @@ URL is a link string. Download the url and parse it to a DOM object"
 
 (defun howdoyou--get-answer-and-time-from-nodes (nodes)
   "From answer NODES produce list of (answer. time)."
-  (cons (dom-by-class nodes "post-text")
+  (cons (dom-by-class nodes "s-prose")
         (mapconcat (lambda (it) (substring (dom-attr it 'title) 0 10))
                    (dom-by-class nodes "relativetime")
                    " / ")))
