@@ -54,6 +54,8 @@
 ;; 2020-08-27:
 ;; - bump version
 ;; - adapt to recent change by SO: css class from "post-text" to "s-prose"
+;; 2020-08-28:
+;; - adapt to recent change by SO: css class from "post-text" to "s-prose"
 
 ;;; Code:
 (require 'promise)
@@ -302,7 +304,7 @@ Return (url title question answers scores tags)"
          (score-nodes (dom-by-class (cdr result) "js-vote-count")))
     (list (car result)
           (dom-text title)
-          (dom-by-class question-dom "post-text")
+          (dom-by-class question-dom "s-prose")
           (mapcar #'howdoyou--get-answer-and-time-from-nodes
                   (seq-take answer-nodes number-of-answers))
           (mapcar (lambda (it) (dom-text it))
