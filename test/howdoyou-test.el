@@ -35,25 +35,14 @@
              (funcall done)))
      (promise-catch done))))
 
-
-(ert-deftest-async test/promise-sk-print-01 (done)
+(ert-deftest-async test/howdoyou-read-so-link (done)
                    (promise-done
                     (promise-chain
                         (howdoyou-read-so-link "https://stackoverflow.com/questions/8425102/how-do-i-load-my-script-into-the-node-js-repl")
                       (then (lambda (result)
-                              (should (equal result (get-buffer "*How Do You*")))
+                              (should (buffer-live-p (get-buffer "*How Do You*")))
                               (funcall done)))
                       (promise-catch done))))
-
-(ert-deftest-async test/promise-sk-print-02 (done)
-                   (promise-done
-                    (promise-chain
-                        (howdoyou-read-so-link "https://stackoverflow.com/questions/586735/how-can-i-check-if-a-current-buffer-exists-in-emacs")
-                      (then (lambda (result)
-                              (should (equal result (get-buffer "*How Do You*")))
-                              (funcall done)))
-                      (promise-catch done))))
-
 
 (ert-deftest-async test/promise-parsing (done)
                    (promise-done
@@ -61,7 +50,6 @@
                         (howdoyou--promise-dom "https://stackoverflow.com/questions/586735/how-can-i-check-if-a-current-buffer-exists-in-emacs")
                       (then #'howdoyou--promise-so-answer)
                       (then (lambda (result)
-                              ;; (should (equal result (get-buffer "*How Do You*")))
                               (should (listp result))
                               (funcall done)))
                       (promise-catch done))))
