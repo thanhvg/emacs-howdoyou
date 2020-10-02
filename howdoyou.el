@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/howdoyou/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2
+;; Version: 0.2.1
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -51,6 +51,10 @@
 ;; howdoyou-switch-to-answer-buffer: switch to answer buffer if non nil, default is nil
 
 ;;; Changelog
+;; 2020-10-02:
+;; - update with change from google
+;; - impove test
+;; - bump version
 ;; 2020-08-27:
 ;; - bump version
 ;; - adapt to recent change by SO: css class from "post-text" to "s-prose"
@@ -115,6 +119,9 @@
 (defvar howdoyou--current-user-agent 0
   "Index to be rotated.")
 
+(defvar howdoyou--google-link-class "^yuRUbf$"
+  "css class name of dom node that has <a href></a> node as a child.")
+
 (define-minor-mode howdoyou-mode
   "Minor mode for howdoyou.
 
@@ -136,35 +143,15 @@
   "List of user agent to make Google happy.")
 
 ;; functions
-(defun howdoyou--extract-links-from-l-class (dom)
-  "Extract links in l class from DOM."
-  (let ((my-nodes (dom-by-class dom "^l$")))
-    (cond
-     ((not my-nodes) nil)
-     ((= 1 (length my-nodes))
-      (howdoyou--extract-links-from-bot-class dom))
-     (t
-      (mapcar (lambda (a-node)
-                (dom-attr a-node 'href))
-              my-nodes)))))
+(defun howdoyou--extract-links-from-crap-class (dom)
+  (let ((my-nodes (dom-by-class dom "^yuRUbf$")))
+    (mapcar (lambda (a-node)
+              (dom-attr (dom-child-by-tag a-node 'a) 'href))
+            my-nodes)))
 
-(defun howdoyou--extract-links-from-bot-class (dom)
-  "Extract links in kCrYT class from DOM."
-  (let* ((my-nodes (dom-by-class dom "^kCrYT$"))
-         (my-a-tags (mapcar (lambda (a-node)
-                              (dom-attr (dom-child-by-tag a-node 'a) 'href))
-                            my-nodes)))
-    (seq-reduce (lambda (acc it)
-                  ;; drop nil and trim the url string off crap
-                  (if (and (stringp it)
-                           (string-match "^/url\\?q=\\(.*?\\)&.*$" it))
-                      (nconc acc `(,(match-string 1 it)))
-                    acc))
-                my-a-tags '())))
-
-(defun howdoyou--extract-links-from-r-class (dom)
+(defun howdoyou--extract-links-from-class (dom class)
   "Extract links inside r class from DOM."
-  (let ((my-nodes (dom-by-class dom "^r$")))
+  (let ((my-nodes (dom-by-class dom class)))
     (mapcar (lambda (a-node)
               (dom-attr (dom-child-by-tag a-node 'a) 'href))
             my-nodes)))
@@ -172,9 +159,7 @@
 (defun howdoyou--extract-links-from-google (dom)
   "Produce links from google search dom.
 DOM is a dom object of the google search, returns a list of links"
-  (if-let ((links (howdoyou--extract-links-from-l-class dom)))
-      links
-    (howdoyou--extract-links-from-r-class dom)))
+  (howdoyou--extract-links-from-class dom howdoyou--google-link-class))
 
 (defun howdoyou--curl-promise-dom (url)
   "Promise (url . dom) from URL with curl."

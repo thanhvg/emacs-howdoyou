@@ -81,6 +81,18 @@ it will pass =counsel-web-suggest= suggestions to howdoyou-query.
 
 [[file:screenshots/howdoyou2.gif]]
 
+* Test
+** generate google html files
+#+begin_src sh
+cd test
+bash curl.sh
+#+end_src
+new google html files are created to run test aganst them.
+** run test
+at project root
+#+begin_src sh
+cask exec ert-runner
+#+end_src
 * Contributors (in no particular order):
 [[https://github.com/dvzubarev][dvzubarev]], [[https://github.com/leothelocust][leothelocust]], [[https://github.com/dickmao][dickmao]], [[https://github.com/AloisJanicek][Alois Janíček]], [[https://github.com/EvanMeek][Evan]] 
 
