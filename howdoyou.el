@@ -203,7 +203,7 @@ URL is a link string. Download the url and parse it to a DOM object"
   "Rotate user agent from `howdoyou--user-agents'."
   (let ((user-agent (nth howdoyou--current-user-agent howdoyou--user-agents)))
     (setq howdoyou--current-user-agent (if (>= howdoyou--current-user-agent
-                                               (length howdoyou--user-agents))
+                                               (1- (length howdoyou--user-agents)))
                                            0
                                          (1+ howdoyou--current-user-agent)))
     user-agent))
