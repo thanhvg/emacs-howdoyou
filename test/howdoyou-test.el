@@ -1,7 +1,7 @@
 ;;; howdoyou-test.el --- Tests for howdoyou
 (ert-deftest test/links-from-google-search ()
   "Should be able to show links"
-  (dolist (google-file '("google.0.html" "google.1.html" "google.2.html"  "google.3.html"  "google.4.html"))
+  (dolist (google-file '("google.0.html" "google.1.html" "google.2.html"))
     (let* ((dom (make-dom-from-file google-file))
            (result (howdoyou--extract-links-from-google dom)))
       (message "%s" result)
