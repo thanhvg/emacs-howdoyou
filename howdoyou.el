@@ -122,6 +122,8 @@
 (defvar howdoyou--google-link-class "^yuRUbf$"
   "css class name of dom node that has <a href></a> node as a child.")
 
+;; (setq howdoyou--google-link-class "^yuRUbf$")
+
 (define-minor-mode howdoyou-mode
   "Minor mode for howdoyou.
 
@@ -135,18 +137,14 @@
 
 ;; idea from https://github.com/gleitz/howdoi
 (defvar howdoyou--user-agents
-  '("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0"
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0"
-    "Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0")
+  '( "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36")
   "List of user agent to make Google happy.")
 
-;; functions
-(defun howdoyou--extract-links-from-crap-class (dom)
-  (let ((my-nodes (dom-by-class dom "^yuRUbf$")))
-    (mapcar (lambda (a-node)
-              (dom-attr (dom-child-by-tag a-node 'a) 'href))
-            my-nodes)))
 
+;; (setq howdoyou--user-agents
+;;   '( "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"))
+
+;; functions
 (defun howdoyou--extract-links-from-class (dom class)
   "Extract links inside r class from DOM."
   (let ((my-nodes (dom-by-class dom class)))

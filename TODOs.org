@@ -292,3 +292,5 @@ CLOSED: [2020-08-03 Mon 12:03]
 * DONE history
 CLOSED: [2019-11-14 Thu 00:10]
 * TODO buttons to delete history item and delete all
+* TODO use ddg
+google changes too much
