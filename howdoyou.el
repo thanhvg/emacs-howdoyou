@@ -51,6 +51,8 @@
 ;; howdoyou-switch-to-answer-buffer: switch to answer buffer if non nil, default is nil
 
 ;;; Changelog
+;; 2021-07-06:
+;; - adapt to new SO change: trim score text
 ;; 2020-10-02:
 ;; - update with change from google
 ;; - impove test
@@ -288,7 +290,7 @@ Return (url title question answers scores tags)"
           (dom-by-class question-dom "s-prose")
           (mapcar #'howdoyou--get-answer-and-time-from-nodes
                   (seq-take answer-nodes number-of-answers))
-          (mapcar (lambda (it) (dom-text it))
+          (mapcar (lambda (it) (string-trim (dom-text it)))
                   (seq-take score-nodes (1+ number-of-answers)))
           tags)))
 
