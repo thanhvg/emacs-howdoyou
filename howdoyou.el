@@ -49,6 +49,7 @@
 ;; howdoyou-use-curl:                default is true if curl is available
 ;; howdoyou-number-of-answers:       maximal number of answers to show, default is 3
 ;; howdoyou-switch-to-answer-buffer: switch to answer buffer if non nil, default is nil
+;; howdoyou-single-buffer            re-use the same output buffer for all operations
 
 ;;; Changelog
 ;; 2021-07-06:
@@ -105,6 +106,12 @@
   :type 'boolean
   :group 'howdoyou)
 
+(defcustom howdoyou-single-buffer t
+  "Whether to re-use the current *How Do You* buffer.
+This can be over-ridden at run-time by using a PREFIX-ARG."
+  :type 'boolean
+  :group 'howdoyou)
+
 ;; private variables
 (defvar howdoyou--current-link-index 0
   "Current index of link.")
@@ -125,6 +132,9 @@
   "css class name of dom node that has <a href></a> node as a child.")
 
 ;; (setq howdoyou--google-link-class "^yuRUbf$")
+
+(defvar howdoyou--current-buffer nil
+  "The current buffer to be used for output.")
 
 (define-minor-mode howdoyou-mode
   "Minor mode for howdoyou.
@@ -208,30 +218,37 @@ URL is a link string. Download the url and parse it to a DOM object"
 
 (defun howdoyou--get-buffer ()
   "Get *How Do You* buffer."
-  (get-buffer-create "*How Do You*"))
+  (let ((name "*How Do You*"))
+    (setq howdoyou--current-buffer
+      (if howdoyou-single-buffer
+        (get-buffer-create (or (and (buffer-name)
+                                    (string-match (regexp-quote name) (buffer-name))
+                                    (current-buffer))
+                               (buffer-live-p howdoyou--current-buffer)
+                               name))
+       (generate-new-buffer name)))))
 
 (defun howdoyou--print-waiting-message (&optional msg &rest args)
   "Print MSG message and prepare window for howdoyou buffer."
-  (let ((my-buffer (howdoyou--get-buffer)))
-    (unless (equal (window-buffer) my-buffer)
-      ;; (switch-to-buffer-other-window my-buffer))
-      (if howdoyou-switch-to-answer-buffer
-          (select-window
-           (display-buffer my-buffer
-                           '(display-buffer-use-some-window (inhibit-same-window
-                                                             . t))))
-        (display-buffer my-buffer
-                        '(display-buffer-use-some-window (inhibit-same-window
-                                                          . t)))))
-    (with-current-buffer my-buffer
-      (let ((inhibit-read-only t))
-        (erase-buffer)
-        (insert (if msg
-                    (apply #'format msg args)
-                  "Searching...")))
-      (read-only-mode 1)
-      (unless howdoyou-mode
-        (howdoyou-mode 1)))))
+  (unless (equal (window-buffer) howdoyou--current-buffer)
+    ;; (switch-to-buffer-other-window howdoyou--current-buffer))
+    (if howdoyou-switch-to-answer-buffer
+        (select-window
+         (display-buffer howdoyou--current-buffer
+                         '(display-buffer-use-some-window (inhibit-same-window
+                                                           . t))))
+      (display-buffer howdoyou--current-buffer
+                      '(display-buffer-use-some-window (inhibit-same-window
+                                                        . t)))))
+  (with-current-buffer howdoyou--current-buffer
+    (let ((inhibit-read-only t))
+      (erase-buffer)
+      (insert (if msg
+                  (apply #'format msg args)
+                "Searching...")))
+    (read-only-mode 1)
+    (unless howdoyou-mode
+      (howdoyou-mode 1))))
 
 (defun howdoyou-promise-answer (query)
   "Process QUERY and print answers to *How Do You* buffer."
@@ -296,8 +313,7 @@ Return (url title question answers scores tags)"
 
 (defun howdoyou--print-answer (answer-list)
   "Print ANSWER-LIST to *How Do You* buffer."
-  (let* ((my-buffer (howdoyou--get-buffer))
-         (url (car answer-list))
+  (let* ((url (car answer-list))
          (title (nth 1 answer-list))
          (question (nth 2 answer-list))
          (answers (nth 3 answer-list)) ;; list of (answer . time)
@@ -308,7 +324,7 @@ Return (url title question answers scores tags)"
          (first-run t) ;; flag for special treatment of first answer
          (lang (car tags))) ;; first tag is usually the language
     (setq howdoyou--current-lang lang)
-    (with-current-buffer my-buffer
+    (with-current-buffer howdoyou--current-buffer
       (read-only-mode -1)
       (erase-buffer)
       (insert "#+STARTUP: overview\n#+TITLE: " title "\n")
@@ -418,11 +434,18 @@ a, img or pre. Otherwise just copy"
 ;;;###autoload
 (defun howdoyou-query (query)
   "Prompt for QUERY and search for answer.
-Pop up *How Do You* buffer to show the answer."
+Pop up *How Do You* buffer to show the answer.
+With a PREFIX-ARG, over-ride the current value of variable
+`howdoyou-single-buffer'."
   (interactive "sQuery: ")
-  (message "_") ;; prevent suggest-key-bindings from usurping minibuffer
-  (howdoyou--update-history query)
-  (howdoyou-promise-answer query))
+  (let ((howdoyou-single-buffer
+         (if current-prefix-arg
+           (not howdoyou-single-buffer)
+          howdoyou-single-buffer)))
+    (message "_") ;; prevent suggest-key-bindings from usurping minibuffer
+    (howdoyou--update-history query)
+    (howdoyou--get-buffer)
+    (howdoyou-promise-answer query)))
 
 (defun howdoyou-n-link (n)
   "Jump N steps in `howdoyou--links' and request and print the answer."
@@ -467,15 +490,29 @@ Pop up *How Do You* buffer to show the answer."
 
 ;;;###autoload
 (defun howdoyou-next-link ()
-  "Go to next link stored in google search."
+  "Go to next link stored in google search.
+With a PREFIX-ARG, over-ride the current value of variable
+`howdoyou-single-buffer'."
   (interactive)
-  (howdoyou-n-link 1))
+  (let ((howdoyou-single-buffer
+         (if current-prefix-arg
+           (not howdoyou-single-buffer)
+          howdoyou-single-buffer)))
+    (howdoyou--get-buffer)
+    (howdoyou-n-link 1)))
 
 ;;;###autoload
 (defun howdoyou-previous-link ()
-  "Go to previous link stored in google search."
+  "Go to previous link stored in google search.
+With a PREFIX-ARG, over-ride the current value of variable
+`howdoyou-single-buffer'."
   (interactive)
-  (howdoyou-n-link -1))
+  (let ((howdoyou-single-buffer
+         (if current-prefix-arg
+           (not howdoyou-single-buffer)
+          howdoyou-single-buffer)))
+    (howdoyou--get-buffer)
+    (howdoyou-n-link -1)))
 
 ;;;###autoload
 (defun howdoyou-reload-link ()
