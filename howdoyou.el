@@ -224,7 +224,8 @@ URL is a link string. Download the url and parse it to a DOM object"
         (get-buffer-create (or (and (buffer-name)
                                     (string-match (regexp-quote name) (buffer-name))
                                     (current-buffer))
-                               (buffer-live-p howdoyou--current-buffer)
+                               (and (buffer-live-p howdoyou--current-buffer)
+                                    howdoyou--current-buffer)
                                name))
        (generate-new-buffer name)))))
 
