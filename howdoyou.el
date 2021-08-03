@@ -113,22 +113,22 @@ This can be over-ridden at run-time by using a PREFIX-ARG."
   :group 'howdoyou)
 
 ;; private variables
-(defvar howdoyou--current-link-index 0
+(defvar-local howdoyou--current-link-index 0
   "Current index of link.")
 
-(defvar howdoyou--links nil
+(defvar-local howdoyou--links nil
   "List of so links from google search.")
 
-(defvar howdoyou--query-history '()
+(defvar-local howdoyou--query-history '()
   "List of query history")
 
-(defvar howdoyou--current-lang nil
+(defvar-local howdoyou--current-lang nil
   "Guested language.")
 
-(defvar howdoyou--current-user-agent 0
+(defvar-local howdoyou--current-user-agent 0
   "Index to be rotated.")
 
-(defvar howdoyou--google-link-class "^yuRUbf$"
+(defvar-local howdoyou--google-link-class "^yuRUbf$"
   "css class name of dom node that has <a href></a> node as a child.")
 
 ;; (setq howdoyou--google-link-class "^yuRUbf$")
