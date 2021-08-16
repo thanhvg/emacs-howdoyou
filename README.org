@@ -94,7 +94,7 @@ at project root
 cask exec ert-runner
 #+end_src
 * Contributors (in no particular order):
-[[https://github.com/dvzubarev][dvzubarev]], [[https://github.com/leothelocust][leothelocust]], [[https://github.com/dickmao][dickmao]], [[https://github.com/AloisJanicek][Alois Janíček]], [[https://github.com/EvanMeek][Evan]] 
+[[https://github.com/dvzubarev][dvzubarev]], [[https://github.com/leothelocust][leothelocust]], [[https://github.com/dickmao][dickmao]], [[https://github.com/AloisJanicek][Alois Janíček]], [[https://github.com/EvanMeek][Evan]], [[https://github.com/Boruch-Baum][Boruch Baum]]
 
 * Shoutout
 - https://github.com/chuntaro/emacs-promise

@@ -252,10 +252,9 @@ URL is a link string. Download the url and parse it to a DOM object"
               (setq howdoyou--current-link-index 0)
               (if howdoyou--links
                   (howdoyou-n-link 0)
-                (howdoyou--print-message "No results \"%s\"" query)
-                (message "howdoyou-promise-answer: No results \"%s\"" query))))
+                (howdoyou--print-message "No results: \"%s\"" query))))
       (catch (lambda (reason)
-               (message "howdoyou-promise-answer: catch error: %s" reason))))))
+               (howdoyou--print-message "Error: %s" reason))))))
 
 (defun howdoyou--get-so-tags (dom)
   "Extract list of tags from stackoverflow DOM."
