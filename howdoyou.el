@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/howdoyou/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.0") (org "9.2"))
-;; Version: 0.2.1
+;; Version: 0.2.2
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -51,6 +51,8 @@
 ;; howdoyou-switch-to-answer-buffer: switch to answer buffer if non nil, default is nil
 
 ;;; Changelog
+;; 2021-09-02:
+;; - use url-retrieve as default instead of request
 ;; 2021-07-06:
 ;; - adapt to new SO change: trim score text
 ;; 2020-10-02:
@@ -82,9 +84,10 @@
   :version "25.1"
   :link '(emacs-commentary-link "howdoyou.el"))
 
-(defcustom howdoyou-use-curl (if (executable-find request-curl)
-                                 t
-                               nil)
+;; (defcustom howdoyou-use-curl (if (executable-find request-curl)
+;;                                  t
+;;                                nil)
+(defcustom howdoyou-use-curl nil
   "Use curl instead of buggy `url-retrieve'."
   :type 'boolean
   :group 'howdoyou)
