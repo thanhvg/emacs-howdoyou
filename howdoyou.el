@@ -221,12 +221,8 @@ URL is a link string. Download the url and parse it to a DOM object"
       ;; (switch-to-buffer-other-window my-buffer))
       (if howdoyou-switch-to-answer-buffer
           (select-window
-           (display-buffer my-buffer
-                           '(display-buffer-use-some-window (inhibit-same-window
-                                                             . t))))
-        (display-buffer my-buffer
-                        '(display-buffer-use-some-window (inhibit-same-window
-                                                          . t)))))
+           (display-buffer my-buffer))
+        (display-buffer my-buffer)))
     (with-current-buffer my-buffer
       (let ((inhibit-read-only t))
         (erase-buffer)
