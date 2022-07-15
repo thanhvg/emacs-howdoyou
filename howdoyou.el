@@ -219,10 +219,12 @@ URL is a link string. Download the url and parse it to a DOM object"
   (let ((my-buffer (howdoyou--get-buffer)))
     (unless (equal (window-buffer) my-buffer)
       ;; (switch-to-buffer-other-window my-buffer))
+      ;; from magit: '(nil (inhibit-same-window . t)) no idea why it works
+      ;; should show a new window in current frame
       (if howdoyou-switch-to-answer-buffer
           (select-window
-           (display-buffer my-buffer))
-        (display-buffer my-buffer)))
+           (display-buffer my-buffer '(nil (inhibit-same-window . t))))
+        (display-buffer my-buffer '(nil (inhibit-same-window . t)))))
     (with-current-buffer my-buffer
       (let ((inhibit-read-only t))
         (erase-buffer)
