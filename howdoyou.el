@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/howdoyou/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.3") (org "9.2"))
-;; Version: 0.3.0
+;; Version: 0.4.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -155,7 +155,8 @@
   "Extract links inside r class from DOM."
   (let ((my-nodes (dom-by-class dom class)))
     (mapcar (lambda (a-node)
-              (dom-attr (dom-child-by-tag (car (dom-children a-node)) 'a) 'href))
+              ;; (setq thanh a-node)
+              (dom-attr (dom-child-by-tag (nth 2 (nth 2 a-node)) 'a) 'href))
             my-nodes)))
 
 (defun howdoyou--extract-links-from-google (dom)
