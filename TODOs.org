@@ -294,3 +294,6 @@ CLOSED: [2019-11-14 Thu 00:10]
 * TODO buttons to delete history item and delete all
 * TODO use ddg
 google changes too much
+
+* extract
+(dom-elements thanh 'href "^/url?esrc=s&q=&rct=j&sa=U&url=https.*")

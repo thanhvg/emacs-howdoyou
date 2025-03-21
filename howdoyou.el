@@ -5,7 +5,7 @@
 ;; Author: Thanh Vuong <thanhvg@gmail.com>
 ;; URL: https://github.com/thanhvg/howdoyou/
 ;; Package-Requires: ((emacs "25.1") (promise "1.1") (request "0.3.3") (org "9.2"))
-;; Version: 0.4.0
+;; Version: 0.5.0
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -51,6 +51,8 @@
 ;; howdoyou-switch-to-answer-buffer: switch to answer buffer if non nil, default is nil
 
 ;;; Changelog
+;; 2025-03-20:
+;; - update google search extraction
 ;; 2021-09-09:
 ;; - back to use curl if possible
 ;; 2021-09-02:
@@ -125,8 +127,8 @@
 (defvar howdoyou--current-user-agent 0
   "Index to be rotated.")
 
-(defvar howdoyou--google-link-class "^yuRUbf$"
-  "css class name of dom node that has <a href></a> node as a child.")
+;; (defvar howdoyou--google-link-class "^yuRUbf$"
+;;   "css class name of dom node that has <a href></a> node as a child.")
 
 ;; (setq howdoyou--google-link-class "^yuRUbf$")
 
@@ -141,39 +143,50 @@
             (define-key map (kbd "C-M-<right>") #'howdoyou-next-link)
             map))
 
-;; idea from https://github.com/gleitz/howdoi
+;; copy from https://github.com/gleitz/howdoi
 (defvar howdoyou--user-agents
-  '( "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36")
+  '("Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0"
+    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:22.0) Gecko/20100 101 Firefox/22.0"
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0"
+    "Mozilla/5.0 (Windows NT 6.1; rv:11.0) Gecko/20100101 Firefox/11.0")
   "List of user agent to make Google happy.")
 
-
-;; (setq howdoyou--user-agents
-;;   '( "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36"))
-
 ;; functions
-(defun howdoyou--extract-links-from-class (dom class)
-  "Extract links inside r class from DOM."
-  (let ((my-nodes (dom-by-class dom class)))
-    (mapcar (lambda (a-node)
-              ;; (setq thanh a-node)
-              (dom-attr (dom-child-by-tag (nth 2 (nth 2 a-node)) 'a) 'href))
-            my-nodes)))
+;; (defun howdoyou--extract-links-from-class (dom class)
+;;   "Extract links inside r class from DOM."
+;;   (let ((my-nodes (dom-by-class dom class)))
+;;     (mapcar (lambda (a-node)
+;;               ;; (setq thanh a-node)
+;;               (dom-attr (dom-child-by-tag (nth 2 (nth 2 a-node)) 'a) 'href))
+;;             my-nodes)))
 
 (defun howdoyou--extract-links-from-google (dom)
   "Produce links from google search dom.
 DOM is a dom object of the google search, returns a list of links"
-  (howdoyou--extract-links-from-class dom howdoyou--google-link-class))
+  ;; (setq thanh dom)
+  ;; (howdoyou--extract-links-from-class dom howdoyou--google-link-class)
+  (mapcar (lambda (it)
+            (let* (( url (dom-attr it 'href))
+                   (start (string-match  "url=\\(https?://[^&]+\\)" url)) )
+              (when start (match-string 1 url))))
+          (dom-elements dom 'href "^\\/url\\?esrc=s&q=&rct=j&sa=U&url=https.*")))
 
 (defun howdoyou--curl-promise-dom (url)
   "Promise (url . dom) from URL with curl."
   (promise-new
    (lambda (resolve reject)
      ;; shadow reject-curl-options to have user agent
-     (let ((request-curl-options `(,(format "-A \"%s\"" (howdoyou--get-user-agent)))))
+     (let
+         ((request-curl-options
+           `(,(format "-A \"%s\"" (howdoyou--get-user-agent)))))
        (request url
-         :parser (lambda () (progn (decode-coding-region (point-min) (point-max) 'utf-8)
-                                   (libxml-parse-html-region (point-min) (point-max))))
-         :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
+         :parser
+         (lambda () (progn
+                      (decode-coding-region (point-min) (point-max) 'utf-8)
+                                   (libxml-parse-html-region (point-min)
+                                                             (point-max))))
+         :error (cl-function (lambda
+                               (&rest args &key error-thrown &allow-other-keys)
                                (funcall reject  error-thrown)))
          :success (cl-function (lambda (&key data &allow-other-keys)
                                  (funcall resolve (cons url data)))))))))
@@ -193,7 +206,10 @@ URL is a link string. Download the url and parse it to a DOM object"
                              (with-current-buffer (current-buffer)
                                (if (not (url-http-parse-headers))
                                    (funcall reject (buffer-string))
-                                 (funcall resolve (cons url (libxml-parse-html-region (point-min) (point-max))))))
+                                 (funcall resolve
+                                          (cons url
+                                                (libxml-parse-html-region
+                                                 (point-min) (point-max))))))
                            (error (funcall reject ex))))))))))
 
 (defun howdoyou--promise-dom (url)
@@ -206,7 +222,8 @@ URL is a link string. Download the url and parse it to a DOM object"
   "Rotate user agent from `howdoyou--user-agents'."
   (let ((user-agent (nth howdoyou--current-user-agent howdoyou--user-agents)))
     (setq howdoyou--current-user-agent (if (>= howdoyou--current-user-agent
-                                               (1- (length howdoyou--user-agents)))
+                                               (1-
+                                                (length howdoyou--user-agents)))
                                            0
                                          (1+ howdoyou--current-user-agent)))
     user-agent))
@@ -280,7 +297,9 @@ Return (url title question answers scores tags)"
   (let* ((answer-nodes (dom-by-class (cdr result) "answercell"))
          (question-dom (car (dom-by-id (cdr result) "^question$")))
          (title (car (dom-by-class (cdr result) "question-hyperlink")))
-         (number-of-answers (if (> (length answer-nodes) howdoyou-number-of-answers)
+         (number-of-answers (if
+                                (> (length answer-nodes)
+                                   howdoyou-number-of-answers)
                                 howdoyou-number-of-answers
                               (length answer-nodes)))
          (tags (howdoyou--get-so-tags (cdr result)))
@@ -306,7 +325,8 @@ Return (url title question answers scores tags)"
          (answer-scores (cdr scores))
          (tags (nth 5 answer-list))
          (first-run t) ;; flag for special treatment of first answer
-         (lang (car tags))) ;; first tag is usually the language
+         (lang (car tags)))
+    ;; first tag is usually the language
     (setq howdoyou--current-lang lang)
     (with-current-buffer my-buffer
       (read-only-mode -1)
@@ -367,12 +387,14 @@ IT is an element in the DOM tree. Map to different IT when it is
 a, img or pre. Otherwise just copy"
   (cond
    ((and (listp it)
-         (listp (cdr it))) ;; check for list but not cons
+         (listp (cdr it)))
+    ;; check for list but not cons
     (cond
      ((equal (car it) 'h2)
       (concat "** " (dom-texts it)))
      ((equal (car it) 'blockquote)
-      `(blockquote nil "#+begin_quote" ,(mapcar #'howdoyou--it-to-it it) "#+end_quote"))
+      `(blockquote nil "#+begin_quote" ,(mapcar #'howdoyou--it-to-it it)
+                   "#+end_quote"))
      ((equal (car it) 'code)
       (concat "~" (dom-texts it) "~"))
      ((equal (car it) 'strong)
@@ -382,7 +404,8 @@ a, img or pre. Otherwise just copy"
      ((memq (car it) '(s del))
       (concat "+" (dom-texts it) "+"))
      ((and (equal (car it) 'a)
-           (not (dom-by-tag it 'img))) ;; bail out if img
+           (not (dom-by-tag it 'img)))
+      ;; bail out if img
       (org-link-make-string (dom-attr it 'href) (dom-texts it)))
      ;; ((and (equal (dom-tag it) 'div)
      ;;       (equal (dom-attr it 'class) "snippet"))
